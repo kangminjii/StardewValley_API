@@ -1,12 +1,11 @@
 #pragma once
+#include "Item.h"
 
-class Player
+class Inventory
 {
 private:
 
 
 public:
-
-
 
 };
