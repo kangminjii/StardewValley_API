@@ -1,16 +1,19 @@
 #pragma once
-#include <Windows.h>
+
 #include <iostream>
+#include "Timer.h"
 using namespace std;
 
 #pragma comment(lib, "msimg32.lib")
 
 static enum view { LEFT, RIGHT, UP, DOWN, PAUSE, NONE };
-class Player
+class Player : Timer
 {
 private:
 	POINT position;
     int viewDir;
+    int speed;
+    int distance;
 
 public:
 	
@@ -25,16 +28,24 @@ public:
     void setViewDir(int vd) { viewDir = vd; }
     int getViewDir() { return viewDir; }
 	
+    // speed
+    void setDistance(float dis) { distance = dis; }
+    int getDistance() { return distance; }
 
 	void Draw(HDC, RECT, HDC, HBITMAP, HDC, HBITMAP);
 	void Move();
+    void UpdatePlayer();
 
 };
 
 Player::Player()
 {
+    //Update(); // getDeltaTime 고정
+    //UpdateFPS();
     position = { 100, 100 };
     viewDir = NONE;
+    speed = 5;
+    distance = speed * getDeltaTime(); // 속도 * 시간
 }
 
 void Player::Draw(HDC hdc, RECT rectView, HDC hMemDC, HBITMAP hOldBitmap, HDC hMemDC2, HBITMAP hOldBitmap2)
@@ -85,26 +96,41 @@ void Player::Draw(HDC hdc, RECT rectView, HDC hMemDC, HBITMAP hOldBitmap, HDC hM
 
 void Player::Move()
 {
+    cout << "deltatime : " << getDeltaTime() << endl;
+    cout << "FPS : " << getFPS() << endl;
+
+    // 초당 값의 변경을 일정하게 보장함
+    //setDistance(10 * speed * getDeltaTime());
+    //setDistance(getFPS() * speed * getDeltaTime());
+    setDistance(3);
+
     if (GetAsyncKeyState(VK_LEFT) & 0x8000)
     {
-        setPosition({ getPositionX() - 5 , getPositionY() });
+        setPosition({ getPositionX() - getDistance() , getPositionY()});
         viewDir = LEFT;
     }
     else if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
     {
-        setPosition({ getPositionX() + 5 , getPositionY() });
+        setPosition({ getPositionX() + getDistance() , getPositionY() });
         viewDir = RIGHT;
     }
     else if (GetAsyncKeyState(VK_UP) & 0x8000)
     {
-        setPosition({ getPositionX(), getPositionY() - 5 });
+        setPosition({ getPositionX(), getPositionY() - getDistance() });
         viewDir = UP;
     }
     else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
     {
-        setPosition({ getPositionX(), getPositionY() + 5 });
+        setPosition({ getPositionX(), getPositionY() + getDistance() });
         viewDir = DOWN;
     }
     else
         viewDir = PAUSE;
+}
+
+void Player::UpdatePlayer()
+{
+    Update();
+    UpdateFPS();
+    
 }

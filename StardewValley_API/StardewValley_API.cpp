@@ -51,7 +51,6 @@ int SPRITE_FRAME_COUNT_Y = 0;
 void CreateBitmap();
 void DeleteBitmap();
 void UpdateFrame(HWND hWnd);
-//VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 // << : FUNC
 
 // >> : Double Buffering
@@ -59,13 +58,12 @@ HBITMAP hDoubleBufferImage;
 void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc);
 // << : Double Buffering
 
+// 객체 선언
+Player p1; // 주인공
+VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 
-// 주인공
-Player p1;
 
-// 애니메이션 재생
-bool AniStart = false;
-
+// >> : Item
 // 1 tile(길이 10)당 좌표로 저장
 vector<POINT> tilemap;
 void CreateTilemap();
@@ -117,16 +115,37 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
-    // 기본 메시지 루프입니다:
-    while (GetMessage(&msg, nullptr, 0, 0))
+    //// 기본 메시지 루프입니다:
+    //while (GetMessage(&msg, nullptr, 0, 0))
+    //{
+    //    if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+    //    {
+    //        TranslateMessage(&msg);
+    //        DispatchMessage(&msg);
+    //    }
+    //}
+
+    // PeekMessage를 통해 메시지가 들어올때 바로 사용되게끔 작동시킴
+    while (true)
     {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            if (WM_QUIT == msg.message)
+                break;
+
+            if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+
+        }
+        else
+        {
+            // 게임 코드 동작 부분
         }
     }
-
+   
     return (int) msg.wParam;
 }
 
@@ -211,33 +230,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         GetClientRect(hWnd, &rectView);
         CreateBitmap();
         CreateTilemap();
-        //SetTimer(hWnd, timer_ID_1, 500, AniProc);
+        SetTimer(hWnd, timer_ID_1, 500, AniProc);
     }
     break;
     case WM_TIMER: // 타이머 이벤트, 타이머는 일이 바쁘지 않을때만 잘 작동됨
     {
+
     }
     break;
     case WM_KEYDOWN:
     {
         p1.Move();
-        if (p1.getViewDir() != PAUSE)
-        {
-            AniStart = true;
-            UpdateFrame(hWnd);
-        }
         InvalidateRect(hWnd, NULL, FALSE);
     }
     break;
     case WM_PAINT:
     {
         hdc = BeginPaint(hWnd, &ps);
+        p1.UpdatePlayer();
         DrawBitmapDoubleBuffering(hWnd, hdc);
-        EndPaint(hWnd, &ps);
+        EndPaint(hWnd, &ps); 
     }
     break;
     case WM_DESTROY:
-        //KillTimer(hWnd, timer_ID_1);
+        KillTimer(hWnd, timer_ID_1);
         DeleteBitmap();
         PostQuitMessage(0);
     break;
@@ -341,10 +357,10 @@ void CreateBitmap()
 
         GetObject(hStoneImage, sizeof(BITMAP), &bitStone);
 
-        // :
         //SPRITE_FRAME_COUNT_X = bitStone.bmWidth / 24;
         //SPRITE_FRAME_COUNT_Y = bitStone.bmHeight / 12;
     }
+        // :
     // << 
 
 }
@@ -469,8 +485,8 @@ void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         bx = bitStone.bmWidth / 24; 
         by = bitStone.bmHeight / 12; 
 
-        int xStart = bx * 4; // 가로에 있는 순서대로 출력이 됨
-        int yStart = by;
+        int xStart = bx * 5; // 가로에 있는 순서대로 출력이 됨
+        int yStart = by *5;
 
         TransparentBlt(hMemDC, 400, 400, bx, by, hMemDC2, xStart, yStart, bx, by, RGB(0,0,0));
 
@@ -503,8 +519,11 @@ void UpdateFrame(HWND hWnd)
         curframe = RUN_FRAME_MIN;
 }
 
-//VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-//{
-//    if(AniStart)
-//        UpdateFrame(hWnd);
-//}
+VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+    if (p1.getViewDir() != PAUSE && idEvent == timer_ID_1)
+    {
+        UpdateFrame(hWnd);
+    }
+    
+}

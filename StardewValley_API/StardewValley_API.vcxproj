@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CObject.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
@@ -134,6 +135,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="StardewValley_API.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StardewValley_API.cpp" />
