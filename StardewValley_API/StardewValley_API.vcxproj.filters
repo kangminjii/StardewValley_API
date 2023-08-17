@@ -13,45 +13,57 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="헤더 파일\Player">
+    <Filter Include="헤더 파일\3. Component">
+      <UniqueIdentifier>{1c9d86cd-eeb5-4e7d-aaa7-9b80290dc19f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\2. Player">
       <UniqueIdentifier>{3f5936dc-eaf9-402b-890b-f21591386397}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\기본">
+    <Filter Include="헤더 파일\1. 기본">
       <UniqueIdentifier>{c6c8eff0-0fa7-4cea-8646-817a4badbaee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Inventory.h">
+    <ClInclude Include="Tilemap.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Item.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>헤더 파일\Player</Filter>
+      <Filter>헤더 파일\2. Player</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
-      <Filter>헤더 파일\Player</Filter>
+      <Filter>헤더 파일\2. Player</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
-      <Filter>헤더 파일\기본</Filter>
+      <Filter>헤더 파일\1. 기본</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>헤더 파일\기본</Filter>
+      <Filter>헤더 파일\1. 기본</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>헤더 파일\기본</Filter>
+      <Filter>헤더 파일\1. 기본</Filter>
     </ClInclude>
     <ClInclude Include="StardewValley_API.h">
-      <Filter>헤더 파일\기본</Filter>
+      <Filter>헤더 파일\1. 기본</Filter>
     </ClInclude>
-    <ClInclude Include="CObject.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="CCollider.h">
+      <Filter>헤더 파일\3. Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StardewValley_API.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>헤더 파일\2. Player</Filter>
+    </ClCompile>
+    <ClCompile Include="CCollider.cpp">
+      <Filter>헤더 파일\3. Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>헤더 파일\2. Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

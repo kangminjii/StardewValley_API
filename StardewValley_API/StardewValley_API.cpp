@@ -36,8 +36,10 @@ BITMAP bitAni1;
 HBITMAP hAniImage2;
 BITMAP bitAni2;
 
-const int SPRITE_SIZE_X = 40; // x 길이 256
-const int SPRITE_SIZE_Y = 64; // y 길이 256
+//const int SPRITE_SIZE_X = 40; // x 길이 256
+//const int SPRITE_SIZE_Y = 64; // y 길이 256
+const int SPRITE_SIZE_X = 27; // x 길이 256
+const int SPRITE_SIZE_Y = 60; // y 길이 256
 
 int RUN_FRAME_MAX = 0;
 int RUN_FRAME_MIN = 0;
@@ -130,19 +132,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
-            if (WM_QUIT == msg.message)
+            if (msg.message == WM_QUIT)
                 break;
-
-            if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+            else
             {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-
         }
         else
         {
             // 게임 코드 동작 부분
+            //p1.Move();
+
         }
     }
    
@@ -230,12 +232,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         GetClientRect(hWnd, &rectView);
         CreateBitmap();
         CreateTilemap();
-        SetTimer(hWnd, timer_ID_1, 500, AniProc);
+        SetTimer(hWnd, timer_ID_1, 300, AniProc);
     }
     break;
     case WM_TIMER: // 타이머 이벤트, 타이머는 일이 바쁘지 않을때만 잘 작동됨
     {
-
+        InvalidateRect(hWnd, NULL, FALSE);
     }
     break;
     case WM_KEYDOWN:
@@ -247,8 +249,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
     {
         hdc = BeginPaint(hWnd, &ps);
-        p1.UpdatePlayer();
+
         DrawBitmapDoubleBuffering(hWnd, hdc);
+
+
         EndPaint(hWnd, &ps); 
     }
     break;
@@ -493,6 +497,9 @@ void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         SelectObject(hMemDC2, hOldBitmap2);
         DeleteDC(hMemDC2);
     }
+
+    p1.UpdatePlayer(hMemDC);
+
     
 
 

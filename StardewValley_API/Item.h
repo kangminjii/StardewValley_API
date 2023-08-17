@@ -1,27 +1,40 @@
 #pragma once
 #include <Windows.h>
-#include <vector>
+#include "CCollider.h"
+
 using namespace std;
 
 class Item
 {
 private:
-
 	POINT position;
 
-public:
+	CCollider* it_Collider;
 
-	Item();
+public:
 
 	// position
 	void setPosition(POINT pos) { position = pos; }
 	int getPositionX() { return position.x; }
 	int getPositionY() { return position.y; }
 
+public:
+
+	Item();
+	~Item();
+
+
+
 
 };
 
 Item::Item()
+	: position{0,0}, it_Collider(nullptr)
 {
-	position = { 0, 0 };
 }
+Item::~Item()
+{
+	if (it_Collider != nullptr)
+		delete it_Collider;
+}
+

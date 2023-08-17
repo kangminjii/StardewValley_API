@@ -1,13 +1,16 @@
 #pragma once
-
 #include <iostream>
-#include "Timer.h"
-using namespace std;
+#include <Windows.h>
 
 #pragma comment(lib, "msimg32.lib")
 
-static enum view { LEFT, RIGHT, UP, DOWN, PAUSE, NONE };
-class Player : Timer
+using namespace std;
+enum view { LEFT, RIGHT, UP, DOWN, PAUSE, NONE };
+
+class CCollider;
+class Timer;
+
+class Player
 {
 private:
 	POINT position;
@@ -15,122 +18,36 @@ private:
     int speed;
     int distance;
 
+    Timer* playerTimer;
+    CCollider* p_Collider;
+
 public:
-	
-    Player();
 
     // position 
     void setPosition(POINT pos) { position = pos; }
-	int getPositionX() { return position.x; }
+    int getPositionX() { return position.x; }
     int getPositionY() { return position.y; }
 
     // viewDir
     void setViewDir(int vd) { viewDir = vd; }
     int getViewDir() { return viewDir; }
-	
+
     // speed
-    void setDistance(float dis) { distance = dis; }
+    void setDistance(int dis) { distance = dis; }
     int getDistance() { return distance; }
 
+public:
+	
+    Player();
+    ~Player();
+
+    // func
 	void Draw(HDC, RECT, HDC, HBITMAP, HDC, HBITMAP);
 	void Move();
-    void UpdatePlayer();
+    void UpdatePlayer(HDC hdc);
+
+    // collider
+    void CreateCollider();
 
 };
 
-Player::Player()
-{
-    //Update(); // getDeltaTime 고정
-    //UpdateFPS();
-    position = { 100, 100 };
-    viewDir = NONE;
-    speed = 5;
-    distance = speed * getDeltaTime(); // 속도 * 시간
-}
-
-void Player::Draw(HDC hdc, RECT rectView, HDC hMemDC, HBITMAP hOldBitmap, HDC hMemDC2, HBITMAP hOldBitmap2)
-{
-    // 주인공 이미지 & 애니메이션 들어갈부분
-   /* HDC hMemDC;
-    HBITMAP hOldBitmap;
-    HDC hMemDC2;
-    HBITMAP hOldBitmap2;*/
-    HBITMAP hDoubleBufferImage = NULL;
-
-    HBITMAP playerImage;
-    BITMAP bitPlayer;
-
-    hMemDC = CreateCompatibleDC(hdc);
-    if (hDoubleBufferImage == NULL)
-    {
-        hDoubleBufferImage = CreateCompatibleBitmap(hdc, rectView.right, rectView.bottom);
-    }
-    hOldBitmap = (HBITMAP)SelectObject(hMemDC, hDoubleBufferImage);
-    
-    // create bitmap
-    playerImage = (HBITMAP)LoadImage(NULL, TEXT("images/player.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-    GetObject(playerImage, sizeof(BITMAP), &bitPlayer);
-
-    // double buffering
-    hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-    hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, playerImage);
-    int bx = bitPlayer.bmWidth; // 전체 너비
-    int by = bitPlayer.bmHeight; // 전체 높이
-
-    BitBlt(hMemDC, getPositionX(), getPositionY(), bx, by, hMemDC2, 0, 0, SRCCOPY);
-
-    SelectObject(hMemDC2, hOldBitmap2);
-    DeleteDC(hMemDC2);
-
-   
-    TransparentBlt(hdc, 0, 0, rectView.right, rectView.bottom, hMemDC, 0, 0, rectView.right, rectView.bottom, RGB(255, 0, 255));
-
-    SelectObject(hMemDC, hOldBitmap);
-    DeleteDC(hMemDC);
-
-    // delete bitmap
-    DeleteObject(playerImage);
-
-    //Rectangle(hdc, getPositionX() - 20, getPositionY() - 20, getPositionX() + 20, getPositionY() + 20);
-}
-
-void Player::Move()
-{
-    cout << "deltatime : " << getDeltaTime() << endl;
-    cout << "FPS : " << getFPS() << endl;
-
-    // 초당 값의 변경을 일정하게 보장함
-    //setDistance(10 * speed * getDeltaTime());
-    //setDistance(getFPS() * speed * getDeltaTime());
-    setDistance(3);
-
-    if (GetAsyncKeyState(VK_LEFT) & 0x8000)
-    {
-        setPosition({ getPositionX() - getDistance() , getPositionY()});
-        viewDir = LEFT;
-    }
-    else if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
-    {
-        setPosition({ getPositionX() + getDistance() , getPositionY() });
-        viewDir = RIGHT;
-    }
-    else if (GetAsyncKeyState(VK_UP) & 0x8000)
-    {
-        setPosition({ getPositionX(), getPositionY() - getDistance() });
-        viewDir = UP;
-    }
-    else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
-    {
-        setPosition({ getPositionX(), getPositionY() + getDistance() });
-        viewDir = DOWN;
-    }
-    else
-        viewDir = PAUSE;
-}
-
-void Player::UpdatePlayer()
-{
-    Update();
-    UpdateFPS();
-    
-}
