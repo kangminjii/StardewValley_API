@@ -1,8 +1,8 @@
 #pragma once
 #include <Windows.h>
 
-class Player;
 class Item;
+class Player;
 
 class CCollider
 {
@@ -11,23 +11,25 @@ private:
 	Player* pOwner;		// 콜라이더를 소유하는 오브젝트
 	Item* iOwner;
 
-	POINT finalPos;		// finalupdate에서 매 프레임마다 계산
-	POINT scale;		// 충돌체의 크기
+	BOOL isCollided;	// 충돌체크
+
+	// 체크용 플래그
+	int havepOwner;
+	int haveiOwner;
 
 public:
 
-	void setScale(POINT _scale) { scale = _scale; }
-	POINT getScale() { return scale; }
+	//void setHaveiOwner(int i) { haveiOwner = i; }
 
 public:
 
 	CCollider();
 	~CCollider();
 
-	void FinalUpdate(HDC hdc);
+	void Paint(HDC hdc);
+	void OnCollision();
 
-
-
+	// private 멤버에 접근하기 위한 friend 선언
 	friend class Player;
 	friend class Item;
 

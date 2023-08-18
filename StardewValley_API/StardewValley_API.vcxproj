@@ -139,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CCollider.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="StardewValley_API.cpp" />
     <ClCompile Include="Timer.cpp" />

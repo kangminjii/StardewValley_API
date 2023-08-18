@@ -1,8 +1,7 @@
 #pragma once
 #include <Windows.h>
-#include "CCollider.h"
 
-using namespace std;
+class CCollider;
 
 class Item
 {
@@ -11,6 +10,9 @@ private:
 
 	CCollider* it_Collider;
 
+	POINT startRect;
+	POINT endRect;
+
 public:
 
 	// position
@@ -18,23 +20,17 @@ public:
 	int getPositionX() { return position.x; }
 	int getPositionY() { return position.y; }
 
+	// RECT
+	void setRect(POINT start, POINT end) { startRect = start; endRect = end; }
+	POINT getStartRect() { return startRect; }
+	POINT getEndRect() { return endRect; }
+
 public:
 
 	Item();
 	~Item();
 
-
-
-
+	void CreateCollider();
+	void UpdateItem(HDC hdc);
 };
-
-Item::Item()
-	: position{0,0}, it_Collider(nullptr)
-{
-}
-Item::~Item()
-{
-	if (it_Collider != nullptr)
-		delete it_Collider;
-}
 

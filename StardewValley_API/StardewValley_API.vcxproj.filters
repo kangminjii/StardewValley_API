@@ -5,51 +5,50 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="리소스 파일">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="헤더 파일\3. Component">
-      <UniqueIdentifier>{1c9d86cd-eeb5-4e7d-aaa7-9b80290dc19f}</UniqueIdentifier>
+    <Filter Include="소스 파일\1. 기본">
+      <UniqueIdentifier>{c6c8eff0-0fa7-4cea-8646-817a4badbaee}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\2. Player">
+    <Filter Include="소스 파일\2. Player">
       <UniqueIdentifier>{3f5936dc-eaf9-402b-890b-f21591386397}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\1. 기본">
-      <UniqueIdentifier>{c6c8eff0-0fa7-4cea-8646-817a4badbaee}</UniqueIdentifier>
+    <Filter Include="소스 파일\3. Component">
+      <UniqueIdentifier>{1c9d86cd-eeb5-4e7d-aaa7-9b80290dc19f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\4. Item">
+      <UniqueIdentifier>{a02e787d-a587-435f-b2ad-d91586515f67}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Tilemap.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일\2. Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>헤더 파일\2. Player</Filter>
-    </ClInclude>
     <ClInclude Include="framework.h">
-      <Filter>헤더 파일\1. 기본</Filter>
+      <Filter>소스 파일\1. 기본</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>헤더 파일\1. 기본</Filter>
+      <Filter>소스 파일\1. 기본</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>헤더 파일\1. 기본</Filter>
+      <Filter>소스 파일\1. 기본</Filter>
     </ClInclude>
     <ClInclude Include="StardewValley_API.h">
-      <Filter>헤더 파일\1. 기본</Filter>
+      <Filter>소스 파일\1. 기본</Filter>
+    </ClInclude>
+    <ClInclude Include="Tilemap.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>소스 파일\2. Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>소스 파일\2. Player</Filter>
     </ClInclude>
     <ClInclude Include="CCollider.h">
-      <Filter>헤더 파일\3. Component</Filter>
+      <Filter>소스 파일\3. Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>소스 파일\4. Item</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -57,13 +56,16 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>헤더 파일\2. Player</Filter>
-    </ClCompile>
-    <ClCompile Include="CCollider.cpp">
-      <Filter>헤더 파일\3. Component</Filter>
+      <Filter>소스 파일\2. Player</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
-      <Filter>헤더 파일\2. Player</Filter>
+      <Filter>소스 파일\2. Player</Filter>
+    </ClCompile>
+    <ClCompile Include="CCollider.cpp">
+      <Filter>소스 파일\3. Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>소스 파일\4. Item</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

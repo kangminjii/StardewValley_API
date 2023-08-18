@@ -3,7 +3,7 @@
 #include "Timer.h"
 
 Player::Player()
-    : position{ 100, 100 }, viewDir(NONE), speed(5), distance(0), p_Collider(nullptr)
+    : position{ 100, 100 }, viewDir(NONE), speed(5), distance(0), p_Collider(nullptr), isCollided(FALSE), startRect{0,0}, endRect{0,0}
 {
     CreateCollider();
 }
@@ -78,22 +78,27 @@ void Player::Move()
 
     if (GetAsyncKeyState(VK_LEFT) & 0x8000)
     {
-        setPosition({ getPositionX() - getDistance() , getPositionY() });
+        if(!isCollided)
+            setPosition({ getPositionX() - getDistance() , getPositionY() });
+
         viewDir = LEFT;
     }
     else if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
     {
-        setPosition({ getPositionX() + getDistance() , getPositionY() });
+        if (!isCollided)
+            setPosition({ getPositionX() + getDistance() , getPositionY() });
         viewDir = RIGHT;
     }
     else if (GetAsyncKeyState(VK_UP) & 0x8000)
     {
-        setPosition({ getPositionX(), getPositionY() - getDistance() });
+        if (!isCollided)
+            setPosition({ getPositionX(), getPositionY() - getDistance() });
         viewDir = UP;
     }
     else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
     {
-        setPosition({ getPositionX(), getPositionY() + getDistance() });
+        if (!isCollided)
+            setPosition({ getPositionX(), getPositionY() + getDistance() });
         viewDir = DOWN;
     }
     else
@@ -102,9 +107,20 @@ void Player::Move()
 
 void Player::UpdatePlayer(HDC hdc)
 {
+    // timer 클래스 사용
     //playerTimer->Update();       // getDeltaTime 고정
     //playerTimer->UpdateFPS();
 
-    if (p_Collider)
-        p_Collider->FinalUpdate(hdc);
+   // if (p_Collider != nullptr)
+    {
+        setRect({ getPositionX() - 5, getPositionY() + 10, }, { getPositionX() + 30, getPositionY() + 70 });
+        p_Collider->Paint(hdc);
+    }
+    
+}
+
+void Player::CollisionCheck()
+{
+    //cout << "iscollided : " << isCollided << endl;
+    isCollided = p_Collider->isCollided;
 }

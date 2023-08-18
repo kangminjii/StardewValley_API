@@ -4,6 +4,7 @@
 #include "framework.h"
 #include "StardewValley_API.h"
 #include "Player.h"
+#include "Item.h"
 #include <vector>
 
 #define MAX_LOADSTRING 100
@@ -70,6 +71,10 @@ VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 vector<POINT> tilemap;
 void CreateTilemap();
 
+Item i1;
+//Item i2;
+
+VOID CALLBACK CheckCollision(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime); // 충돌체크
 
 
 
@@ -221,23 +226,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    static POINT ptCurPos;
+    //static POINT ptCurPos;
     
     switch (message)
     {
     case WM_CREATE: // 초기화 값 세팅
     {
-        ptCurPos.x = 0;
-        ptCurPos.y = 0;
-        GetClientRect(hWnd, &rectView);
-        CreateBitmap();
+        //ptCurPos.x = 0;
+        //ptCurPos.y = 0;
+
         CreateTilemap();
+
+        // animation
+        CreateBitmap();
+        GetClientRect(hWnd, &rectView);
         SetTimer(hWnd, timer_ID_1, 300, AniProc);
+        SetTimer(hWnd, timer_ID_2, 100, CheckCollision);
+        // item
+        i1.setPosition({ 200, 100 });
+        //i2.setPosition({ 500, 500 });
+
+
     }
     break;
     case WM_TIMER: // 타이머 이벤트, 타이머는 일이 바쁘지 않을때만 잘 작동됨
     {
-        InvalidateRect(hWnd, NULL, FALSE);
+        InvalidateRect(hWnd, NULL, TRUE);
     }
     break;
     case WM_KEYDOWN:
@@ -364,7 +378,6 @@ void CreateBitmap()
         //SPRITE_FRAME_COUNT_X = bitStone.bmWidth / 24;
         //SPRITE_FRAME_COUNT_Y = bitStone.bmHeight / 12;
     }
-        // :
     // << 
 
 }
@@ -482,7 +495,7 @@ void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
     }
     // <<
 
-    // > : stone
+    // > : stone1
     {
         hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
         hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hStoneImage);
@@ -492,13 +505,32 @@ void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         int xStart = bx * 5; // 가로에 있는 순서대로 출력이 됨
         int yStart = by *5;
 
-        TransparentBlt(hMemDC, 400, 400, bx, by, hMemDC2, xStart, yStart, bx, by, RGB(0,0,0));
+        TransparentBlt(hMemDC, i1.getPositionX(), i1.getPositionY(), bx, by, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
 
         SelectObject(hMemDC2, hOldBitmap2);
         DeleteDC(hMemDC2);
     }
 
+    // > : stone2
+    {
+        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
+        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hStoneImage);
+        bx = bitStone.bmWidth / 24;
+        by = bitStone.bmHeight / 12;
+
+        int xStart = bx * 4; // 가로에 있는 순서대로 출력이 됨
+        int yStart = by * 4;
+
+        //TransparentBlt(hMemDC, i2.getPositionX(), i2.getPositionY(), bx, by, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
+
+        SelectObject(hMemDC2, hOldBitmap2);
+        DeleteDC(hMemDC2);
+    }
+
+    // 충돌 처리되는 그리드 확인
     p1.UpdatePlayer(hMemDC);
+    i1.UpdateItem(hMemDC);
+    //i2.UpdateItem(hMemDC);
 
     
 
@@ -534,3 +566,13 @@ VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
     }
     
 }
+
+// 계속 충돌 체크해주는 업데이트문
+VOID CALLBACK CheckCollision(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+    if (idEvent == timer_ID_2)
+    {
+        p1.CollisionCheck();
+    }
+}
+

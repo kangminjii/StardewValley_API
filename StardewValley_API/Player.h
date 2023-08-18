@@ -21,6 +21,11 @@ private:
     Timer* playerTimer;
     CCollider* p_Collider;
 
+    POINT startRect;
+    POINT endRect;
+
+    BOOL isCollided;
+
 public:
 
     // position 
@@ -36,6 +41,12 @@ public:
     void setDistance(int dis) { distance = dis; }
     int getDistance() { return distance; }
 
+    // RECT
+    void setRect(POINT start, POINT end) { startRect = start; endRect = end; }
+    POINT getStartRect() { return startRect; }
+    POINT getEndRect() { return endRect; }
+
+
 public:
 	
     Player();
@@ -48,6 +59,7 @@ public:
 
     // collider
     void CreateCollider();
+    void CollisionCheck();
 
 };
 
