@@ -1,29 +1,18 @@
 #include "Item.h"
-#include "CCollider.h"
 
 
 Item::Item()
-	: position{ 0,0 }, it_Collider(nullptr), startRect{0,0}, endRect{0,0}
+	: position{0, 0}, startRect{0, 0}, endRect{0, 0}
 {
-	CreateCollider();
+	
 }
 Item::~Item()
 {
-	if (it_Collider != nullptr)
-		delete it_Collider;
 }
-
-void Item::CreateCollider()
+Item::Item(POINT startLocation)
 {
-	it_Collider = new CCollider;
-	it_Collider->iOwner = this;
-}
+	position = startLocation;
 
-void Item::UpdateItem(HDC hdc)
-{
-	if (it_Collider)
-	{
-		setRect({ getPositionX() + 1, getPositionY() - 4 }, { getPositionX() + 17, getPositionY() + 14 });
-		it_Collider->Paint(hdc);
-	}
+	setRect({ getPositionX() - 10, getPositionY() - 10 }, { getPositionX() + 30, getPositionY() + 30 });
+	//setRect({ getPositionX() + 1, getPositionY() - 4 }, { getPositionX() + 17, getPositionY() + 14 });
 }

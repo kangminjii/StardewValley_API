@@ -1,24 +1,17 @@
 #include "Player.h"
-#include "CCollider.h"
 #include "Timer.h"
 
 Player::Player()
-    : position{ 100, 100 }, viewDir(NONE), speed(5), distance(0), p_Collider(nullptr), isCollided(FALSE), startRect{0,0}, endRect{0,0}
+    : position{ 100, 100 }, viewDir(NONE), speed(5), distance(0), startRect{0,0}, endRect{0,0}, isCollided(false)
 {
-    CreateCollider();
 }
 Player::~Player()
 {
-    if (p_Collider != nullptr)
-        delete p_Collider;
+    
 }
 
-void Player::CreateCollider()
-{
-    p_Collider = new CCollider;
-    p_Collider->pOwner = this;
-}
 
+// 사용 안하는중
 void Player::Draw(HDC hdc, RECT rectView, HDC hMemDC, HBITMAP hOldBitmap, HDC hMemDC2, HBITMAP hOldBitmap2)
 {
     // 주인공 이미지 & 애니메이션 들어갈부분
@@ -103,24 +96,18 @@ void Player::Move()
     }
     else
         viewDir = PAUSE;
+
 }
 
-void Player::UpdatePlayer(HDC hdc)
+void Player::UpdatePlayer()
 {
     // timer 클래스 사용
     //playerTimer->Update();       // getDeltaTime 고정
     //playerTimer->UpdateFPS();
 
-   // if (p_Collider != nullptr)
-    {
-        setRect({ getPositionX() - 5, getPositionY() + 10, }, { getPositionX() + 30, getPositionY() + 70 });
-        p_Collider->Paint(hdc);
-    }
-    
+
+    Move();
+    setRect({ getPositionX() - 5, getPositionY() + 10, }, { getPositionX() + 30, getPositionY() + 70 });
+
 }
 
-void Player::CollisionCheck()
-{
-    //cout << "iscollided : " << isCollided << endl;
-    isCollided = p_Collider->isCollided;
-}

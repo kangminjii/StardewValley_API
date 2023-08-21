@@ -1,17 +1,15 @@
 #pragma once
 #include <Windows.h>
 
-class CCollider;
-
 class Item
 {
 private:
-	POINT position;
 
-	CCollider* it_Collider;
+	POINT position;
 
 	POINT startRect;
 	POINT endRect;
+
 
 public:
 
@@ -25,12 +23,13 @@ public:
 	POINT getStartRect() { return startRect; }
 	POINT getEndRect() { return endRect; }
 
+	
+
 public:
 
 	Item();
+	Item(POINT startLocation);
 	~Item();
 
-	void CreateCollider();
-	void UpdateItem(HDC hdc);
 };
 

@@ -1,30 +1,28 @@
 #pragma once
 #include <iostream>
 #include <Windows.h>
+#include "Timer.h"
 
 #pragma comment(lib, "msimg32.lib")
 
 using namespace std;
 enum view { LEFT, RIGHT, UP, DOWN, PAUSE, NONE };
 
-class CCollider;
-class Timer;
-
 class Player
 {
 private:
+
 	POINT position;
     int viewDir;
     int speed;
     int distance;
 
-    Timer* playerTimer;
-    CCollider* p_Collider;
+    //Timer* playerTimer;
 
     POINT startRect;
     POINT endRect;
 
-    BOOL isCollided;
+    bool isCollided;
 
 public:
 
@@ -41,10 +39,14 @@ public:
     void setDistance(int dis) { distance = dis; }
     int getDistance() { return distance; }
 
-    // RECT
+    // RECT - collision range
     void setRect(POINT start, POINT end) { startRect = start; endRect = end; }
     POINT getStartRect() { return startRect; }
     POINT getEndRect() { return endRect; }
+
+    // collided check
+    void setCollided(bool check) { isCollided = check; }
+    bool getCollided() { return isCollided; }
 
 
 public:
@@ -55,11 +57,7 @@ public:
     // func
 	void Draw(HDC, RECT, HDC, HBITMAP, HDC, HBITMAP);
 	void Move();
-    void UpdatePlayer(HDC hdc);
-
-    // collider
-    void CreateCollider();
-    void CollisionCheck();
+    void UpdatePlayer();
 
 };
 

@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CCollider.h" />
+    <ClInclude Include="GameCenter.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Tilemap.h" />
     <ClInclude Include="Item.h" />
@@ -138,7 +138,7 @@
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CCollider.cpp" />
+    <ClCompile Include="GameCenter.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="StardewValley_API.cpp" />

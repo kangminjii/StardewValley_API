@@ -15,11 +15,11 @@
     <Filter Include="소스 파일\2. Player">
       <UniqueIdentifier>{3f5936dc-eaf9-402b-890b-f21591386397}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\3. Component">
-      <UniqueIdentifier>{1c9d86cd-eeb5-4e7d-aaa7-9b80290dc19f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\4. Item">
       <UniqueIdentifier>{a02e787d-a587-435f-b2ad-d91586515f67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\3. GameManger">
+      <UniqueIdentifier>{1c9d86cd-eeb5-4e7d-aaa7-9b80290dc19f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -44,8 +44,8 @@
     <ClInclude Include="Player.h">
       <Filter>소스 파일\2. Player</Filter>
     </ClInclude>
-    <ClInclude Include="CCollider.h">
-      <Filter>소스 파일\3. Component</Filter>
+    <ClInclude Include="GameCenter.h">
+      <Filter>소스 파일\3. GameManger</Filter>
     </ClInclude>
     <ClInclude Include="Item.h">
       <Filter>소스 파일\4. Item</Filter>
@@ -61,8 +61,8 @@
     <ClCompile Include="Timer.cpp">
       <Filter>소스 파일\2. Player</Filter>
     </ClCompile>
-    <ClCompile Include="CCollider.cpp">
-      <Filter>소스 파일\3. Component</Filter>
+    <ClCompile Include="GameCenter.cpp">
+      <Filter>소스 파일\3. GameManger</Filter>
     </ClCompile>
     <ClCompile Include="Item.cpp">
       <Filter>소스 파일\4. Item</Filter>
