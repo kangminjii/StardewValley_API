@@ -8,7 +8,7 @@ class GameCenter
 private:
 
 	Player player;
-	std::list<Item*> itemList;
+	std::list<Item> itemList;
 
 	
 public:
@@ -18,7 +18,7 @@ public:
 
 	// list
 	void setItemList() { addItem(); }
-	std::list<Item*> getItemList() { return itemList; }
+	std::list<Item>& getItemList() { return itemList; }
 
 	
 public:

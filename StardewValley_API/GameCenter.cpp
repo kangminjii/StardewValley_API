@@ -29,10 +29,10 @@ void GameCenter::Update()
 void GameCenter::addItem()
 {
 	Item i1({200, 200});
-	itemList.push_back(&i1);
+	itemList.push_back(i1);
 
 	Item i2({ 300, 300 });
-	itemList.push_back(&i2);
+	itemList.push_back(i2);
 }
 
 void GameCenter::deleteItem()
@@ -51,7 +51,7 @@ void GameCenter::Render(HDC hdc)
 
 	Rectangle(hdc, player.getStartRect().x, player.getStartRect().y, player.getEndRect().x, player.getEndRect().y);
 	for (auto it = itemList.begin(); it != itemList.end(); it++)
-		Rectangle(hdc, (*it)->getStartRect().x, (*it)->getStartRect().y, (*it)->getEndRect().x, (*it)->getEndRect().y);
+		Rectangle(hdc, it->getStartRect().x, it->getStartRect().y, it->getEndRect().x, it->getEndRect().y);
 
 
 	DeleteObject(hBrush);
@@ -68,9 +68,9 @@ void GameCenter::OnCollision()
 {
 	for (auto it = itemList.begin(); it != itemList.end(); it++)
 	{
-		if (player.getStartRect().x + 3 < (*it)->getEndRect().x && (*it)->getStartRect().x + 3 < player.getEndRect().x)
+		if (player.getStartRect().x + 3 < it->getEndRect().x && it->getStartRect().x + 3 < player.getEndRect().x)
 		{
-			if (player.getStartRect().y + 3 < (*it)->getEndRect().y && player.getEndRect().y + 3 > (*it)->getStartRect().y)
+			if (player.getStartRect().y + 3 < it->getEndRect().y && player.getEndRect().y + 3 > it->getStartRect().y)
 			{
 				player.setCollided(true);
 				cout << "collided! " << player.getCollided() << endl;

@@ -500,7 +500,7 @@ void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         int yStart = by *5;
 
         for (auto it = GC.getItemList().begin(); it != GC.getItemList().end(); it++)
-            TransparentBlt(hMemDC, (*it)->getPositionX(), (*it)->getPositionY(), bx, by, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
+            TransparentBlt(hMemDC, it->getPositionX(), it->getPositionY(), bx, by, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
 
         SelectObject(hMemDC2, hOldBitmap2);
         DeleteDC(hMemDC2);
