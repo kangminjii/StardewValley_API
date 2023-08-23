@@ -2,17 +2,16 @@
 
 
 Item::Item()
-	: position{0, 0}, startRect{0, 0}, endRect{0, 0}
-{
-	
-}
+	: position{0, 0}, startRect{0, 0}, endRect{0, 0}, mineCount(0)
+{}
+
 Item::~Item()
-{
-}
+{}
+
 Item::Item(POINT startLocation)
+	: mineCount(0)
 {
 	position = startLocation;
 
-	setRect({ getPositionX() - 10, getPositionY() - 10 }, { getPositionX() + 30, getPositionY() + 30 });
-	//setRect({ getPositionX() + 1, getPositionY() - 4 }, { getPositionX() + 17, getPositionY() + 14 });
+	setRect({ getPositionX() - 4, getPositionY() }, { getPositionX() + 34, getPositionY() + 32 });
 }

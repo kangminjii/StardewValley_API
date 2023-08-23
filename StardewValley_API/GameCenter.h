@@ -8,19 +8,18 @@ class GameCenter
 private:
 
 	Player player;
-	std::list<Item> itemList;
-
+	std::list<Item*> itemList;
 	
 public:
 
+	// player : 플레이어 객체 불러오기
 	void setPlayer(Player p) { player = p; }
 	Player getPlayer() { return player; }
 
-	// list
+	// item : 아이템리스트 객체 불러오기
 	void setItemList() { addItem(); }
-	std::list<Item>& getItemList() { return itemList; }
+	std::list<Item*>& getItemList() { return itemList; }
 
-	
 public:
 
 	GameCenter();
@@ -30,14 +29,14 @@ public:
 	void addItem();
 	void deleteItem();
 
-	// 반복적으로 체크해주는 함수
+	// >> : 반복적으로 체크해주는 함수
 	void Update();
-
-	void OnCollisionEnter();
 	void OnCollision();
-	void OnCollisionExit();
-
 	void Render(HDC hdc);
 
+	// 광질하는지 체크
+	int isMining(HWND hWnd);
+
+	// << :
 };
 
