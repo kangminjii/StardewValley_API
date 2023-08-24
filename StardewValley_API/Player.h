@@ -1,8 +1,6 @@
 #pragma once
-#include <iostream>
-#include <Windows.h>
+#include "Define.h"
 #include "Timer.h"
-
 #pragma comment(lib, "msimg32.lib")
 
 using namespace std;
@@ -12,12 +10,12 @@ class Player
 {
 private:
 
-    //Timer* playerTimer;
+    Timer* playerTimer;
 
-	POINT position;
-    POINT prevPosition;
-    int distance;
-    int speed;
+	Vec2 position;
+    Vec2 prevPosition;
+    float distance;
+    float speed;
 
     int viewDir;
     int preViewDir;
@@ -32,25 +30,26 @@ private:
 
     POINT cursorPos;
 
-
 public:
 
+    //// 이동 관련
     // position : 플레이어 위치
-    void setPosition(POINT pos) { position = pos; }
-    POINT getPosition() { return position; }
-    void setPrevPosition(POINT prepos) { prevPosition = prepos; }
-    POINT getPrevPosition() { return prevPosition; }
+    void setPosition(Vec2 pos) { position = pos; }
+    Vec2 getPosition() { return position; }
+    void setPrevPosition(Vec2 prepos) { prevPosition = prepos; }
+    Vec2 getPrevPosition() { return prevPosition; }
 
     // distance : 플레이어 이동거리
-    void setDistance(int dis) { distance = dis; }
-    int getDistance() { return distance; }
-
+    void setDistance(float dis) { distance = dis; }
+    float getDistance() { return distance; }
 
     // viewDir : 플레이어가 보는 방향
     void setViewDir(int vd) { viewDir = vd; }
     int getpreViewDir() { return preViewDir; }
     int getViewDir() { return viewDir; }
 
+
+    //// 충돌 관련
     // RECT : 플레이어 collider 사각형
     void setRect(POINT start, POINT end) { startRect = start; endRect = end; }
     POINT getStartRect() { return startRect; }
@@ -61,21 +60,44 @@ public:
     int getCollidedDir() { return preViewDir; }
 
     
+    //// 상호작용 관련
     // cursor : 마우스 커서 위치
     void setCursorPos(int x, int y) { cursorPos.x = x; cursorPos.y = y; }
     POINT getCursorPos() { return cursorPos; }
 
 public:
-	
     Player();
     ~Player();
 
     // func
-	//void Draw(HDC, RECT, HDC, HBITMAP, HDC, HBITMAP);
 	void Move();
     void Click(HWND hWnd);
     void UpdatePlayer();
 
+
+private:
+    //// 더블 버퍼링
+
+    // 애니메이션
+    HBITMAP hAniImage1;
+    BITMAP bitAni1;
+    HBITMAP hAniImage2;
+    BITMAP bitAni2;
+
+    int SPRITE_SIZE_X = 27; // x 길이 256
+    int SPRITE_SIZE_Y = 60; // y 길이 256
+
+    int RUN_FRAME_MAX = 0;
+    int RUN_FRAME_MIN = 0;
+    int curframe = RUN_FRAME_MIN;
+
+    int SPRITE_FRAME_COUNT_X = 0;
+    int SPRITE_FRAME_COUNT_Y = 0;
+
+public:
+    void CreateBitmap();
+    void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc);
+    void DeleteBitmap();
 
 };
 

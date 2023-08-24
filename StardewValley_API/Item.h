@@ -1,5 +1,8 @@
 #pragma once
-#include <Windows.h>
+#include "Define.h"
+
+enum itemType { stone1, stone2, EMPTY};
+
 
 class Item
 {
@@ -10,7 +13,8 @@ private:
 	POINT startRect;
 	POINT endRect;
 
-	int mineCount;
+	int mineCount; // 없어질 클릭 횟수
+	int paintType; // 광물의 종류
 
 public:
 
@@ -28,11 +32,33 @@ public:
 	void setMineCount(int mc) { mineCount = mc; }
 	int getMineCount() { return mineCount; }
 
+	// 광물의 종류 구분
+	void setPaintType(int pt) { paintType = pt; }
+	int getPaintType() { return paintType; }
+
 public:
 
 	Item();
-	Item(POINT startLocation);
+	Item(POINT startLocation, int paintType);
 	~Item();
+
+//// 더블 버퍼링
+private:
+
+	HBITMAP hStoneImage;
+	BITMAP  bitStone;
+
+	int SPRITE_SIZE_X = 27; // x 길이 256
+	int SPRITE_SIZE_Y = 60; // y 길이 256
+
+	int RUN_FRAME_MAX = 0;
+	int RUN_FRAME_MIN = 0;
+	int curframe = RUN_FRAME_MIN;
+
+public:
+	void CreateBitmap();
+	void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc);
+	void DeleteBitmap();
 
 };
 

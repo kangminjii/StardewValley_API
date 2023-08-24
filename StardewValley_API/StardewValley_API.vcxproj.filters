@@ -21,6 +21,9 @@
     <Filter Include="소스 파일\3. GameManger">
       <UniqueIdentifier>{1c9d86cd-eeb5-4e7d-aaa7-9b80290dc19f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\5. 기타">
+      <UniqueIdentifier>{ba3b6829-b066-4da3-a391-9ce2f3352249}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -38,9 +41,6 @@
     <ClInclude Include="Tilemap.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>소스 파일\2. Player</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>소스 파일\2. Player</Filter>
     </ClInclude>
@@ -50,15 +50,18 @@
     <ClInclude Include="Item.h">
       <Filter>소스 파일\4. Item</Filter>
     </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>소스 파일\5. 기타</Filter>
+    </ClInclude>
+    <ClInclude Include="Define.h">
+      <Filter>소스 파일\5. 기타</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>소스 파일\2. Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="StardewValley_API.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>소스 파일\2. Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
       <Filter>소스 파일\2. Player</Filter>
     </ClCompile>
     <ClCompile Include="GameCenter.cpp">
@@ -66,6 +69,15 @@
     </ClCompile>
     <ClCompile Include="Item.cpp">
       <Filter>소스 파일\4. Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>소스 파일\5. 기타</Filter>
+    </ClCompile>
+    <ClCompile Include="Define.cpp">
+      <Filter>소스 파일\5. 기타</Filter>
+    </ClCompile>
+    <ClCompile Include="StardewValley_API.cpp">
+      <Filter>소스 파일\5. 기타</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

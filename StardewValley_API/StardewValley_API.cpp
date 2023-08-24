@@ -1,78 +1,14 @@
 ﻿// StardewValley_API.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
+#include "Define.h"
 #define _CRT_SECURE_NO_WARNINGS
 #include "framework.h"
 #include "StardewValley_API.h"
 #include "GameCenter.h"
-#include <vector>
 
 #define MAX_LOADSTRING 100
-#define timer_ID_1 11
-#define timer_ID_2 12
-#define timer_ID_3 13
 
-
-
-// >> : BITMAP
-#pragma comment(lib, "msimg32.lib")
-
-RECT rectView;
-
-// 배경
-HBITMAP hMapImage;
-BITMAP  bitMap;
-
-// 돌
-HBITMAP hStoneImage;
-BITMAP  bitStone;
-
-
-// << : BITMAP
-
-// >> : ANI
-HBITMAP hAniImage1;
-BITMAP bitAni1;
-HBITMAP hAniImage2;
-BITMAP bitAni2;
-
-//const int SPRITE_SIZE_X = 40; // x 길이 256
-//const int SPRITE_SIZE_Y = 64; // y 길이 256
-const int SPRITE_SIZE_X = 27; // x 길이 256
-const int SPRITE_SIZE_Y = 60; // y 길이 256
-
-int RUN_FRAME_MAX = 0;
-int RUN_FRAME_MIN = 0;
-int curframe = RUN_FRAME_MIN;
-
-int SPRITE_FRAME_COUNT_X = 0;
-int SPRITE_FRAME_COUNT_Y = 0;
-// << : ANI
-
-// >> : FUNC
-void CreateBitmap();
-void DeleteBitmap();
-void UpdateFrame(HWND hWnd);
-// << : FUNC
-
-// >> : Double Buffering
-HBITMAP hDoubleBufferImage;
-void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc);
-// << : Double Buffering
-
-
-// 타이머 함수
-VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
-VOID CALLBACK AniMine(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
-
-
-// Tilemap
-// 1 tile(길이 10)당 좌표로 저장
-vector<POINT> tilemap;
-void CreateTilemap();
-
-
-GameCenter GC;
-
+HWND g_hWnd;
 
 #ifdef UNICODE
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console") 
@@ -114,7 +50,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
     // 게임센터(주인공과 충돌체들 부르는 객체)
-    //GameCenter GC;
+    GameCenter::GetInstance()->Init(g_hWnd, POINT{1000, 800});
 
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_STARDEWVALLEYAPI));
@@ -147,7 +83,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         else
         {
             // 게임 코드 동작 부분
-            //GC.Update();
+            GameCenter::GetInstance()->Update();
+            InvalidateRect(g_hWnd, NULL, FALSE);
         }
     }
    
@@ -196,16 +133,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      500, 200, 1000, 800, nullptr, nullptr, hInstance, nullptr);
+  g_hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+     CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
+   if (!g_hWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   ShowWindow(g_hWnd, nCmdShow);
+   UpdateWindow(g_hWnd);
 
    return TRUE;
 }
@@ -222,45 +159,18 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    PAINTSTRUCT ps;
-    HDC hdc;
-    
+  
     switch (message)
     {
-    case WM_CREATE: // 초기화 값 세팅
-    {
-        CreateTilemap();
-
-        // animation
-        CreateBitmap();
-        GetClientRect(hWnd, &rectView);
-        SetTimer(hWnd, timer_ID_1, 300, AniProc);
-        SetTimer(hWnd, timer_ID_2, 10, NULL); // wm_timer에서 처리
-        //SetTimer(hWnd, timer_ID_3, 1000, AniMine);
-    }
-    break;
-    case WM_TIMER: // 타이머 이벤트, 타이머는 일이 바쁘지 않을때만 잘 작동됨
-    {
-        GC.Update();
-        InvalidateRect(hWnd, NULL, FALSE);
-    }
-    break;
-    case WM_LBUTTONDOWN:
-    {
-        GC.isMining(hWnd);
-    }
-    break;
     case WM_PAINT:
     {
-        hdc = BeginPaint(hWnd, &ps);
-        DrawBitmapDoubleBuffering(hWnd, hdc);
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
         EndPaint(hWnd, &ps); 
     }
     break;
     case WM_DESTROY:
-        KillTimer(hWnd, timer_ID_1);
-        KillTimer(hWnd, timer_ID_2);
-        DeleteBitmap();
+       
         PostQuitMessage(0);
     break;
     default:
@@ -288,267 +198,3 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return (INT_PTR)FALSE;
 }
-
-void CreateTilemap()
-{
-    // 사이즈 10인 칸들
-    for (int i = 0; i < 100; i++)
-    {
-        for (int j = 0; j < 80; j++)
-        {
-            tilemap.push_back({ i, j });
-        }
-    }
-}
-
-
-void CreateBitmap()
-{
-    // >> : map
-    {
-        hMapImage = (HBITMAP)LoadImage(NULL, TEXT("images/map.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-
-        if (hMapImage == NULL) // 이미지가 출력되지 않을 때
-        {
-            DWORD dwError = GetLastError();
-            MessageBox(NULL, _T("이미지 로드 에러4"), _T("에러"), MB_OK);
-            return;
-        }
-
-        GetObject(hMapImage, sizeof(BITMAP), &bitMap);
-    }
-    // <<
-
-    // >> : animation
-    { // down & left
-        hAniImage1 = (HBITMAP)LoadImage(NULL, TEXT("images/test1.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-
-        GetObject(hAniImage1, sizeof(BITMAP), &bitAni1);
-
-        // :
-        RUN_FRAME_MAX = bitAni1.bmWidth / SPRITE_SIZE_X - 1; // 8
-        RUN_FRAME_MIN = 1;
-        curframe = RUN_FRAME_MIN;
-
-        SPRITE_FRAME_COUNT_X = bitAni1.bmWidth / SPRITE_SIZE_X;
-        SPRITE_FRAME_COUNT_Y = bitAni1.bmHeight / SPRITE_SIZE_Y;
-    }
-
-    { // up & right
-        hAniImage2 = (HBITMAP)LoadImage(NULL, TEXT("images/test2.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-
-        GetObject(hAniImage2, sizeof(BITMAP), &bitAni2);
-
-        // :
-        RUN_FRAME_MAX = bitAni2.bmWidth / SPRITE_SIZE_X - 1; // 8
-        RUN_FRAME_MIN = 1;
-        curframe = RUN_FRAME_MIN;
-
-        SPRITE_FRAME_COUNT_X = bitAni2.bmWidth / SPRITE_SIZE_X;
-        SPRITE_FRAME_COUNT_Y = bitAni2.bmHeight / SPRITE_SIZE_Y;
-    }
-    // <<
-
-    // >> : item(stone)
-    {
-        hStoneImage = (HBITMAP)LoadImage(NULL, TEXT("images/stones.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-
-        GetObject(hStoneImage, sizeof(BITMAP), &bitStone);
-
-        //SPRITE_FRAME_COUNT_X = bitStone.bmWidth / 24;
-        //SPRITE_FRAME_COUNT_Y = bitStone.bmHeight / 12;
-    }
-    // << 
-
-}
-
-void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
-{
-    HDC hMemDC;
-    HBITMAP hOldBitmap;
-    int bx, by;
-
-    HDC hMemDC2;
-    HBITMAP hOldBitmap2;
-
-    hMemDC = CreateCompatibleDC(hdc);
-    if (hDoubleBufferImage == NULL)
-    {
-        hDoubleBufferImage = CreateCompatibleBitmap(hdc, rectView.right, rectView.bottom);
-    }
-    hOldBitmap = (HBITMAP)SelectObject(hMemDC, hDoubleBufferImage); //  기본은 검정색
-
-    // >> : map
-    {
-        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hMapImage);
-        bx = bitMap.bmWidth; // 전체 너비
-        by = bitMap.bmHeight; // 전체 높이
-
-        BitBlt(hMemDC, 0, 0, bx, by, hMemDC2, 0, 0, SRCCOPY);
-
-        SelectObject(hMemDC2, hOldBitmap2);
-        DeleteDC(hMemDC2);
-    }
-    // << 
-   
-    // >> : animation
-    // down
-    if (GC.getPlayer().getViewDir() == DOWN || GC.getPlayer().getViewDir() == PAUSE)
-    {
-        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hAniImage1);
-        bx = bitAni1.bmWidth / SPRITE_FRAME_COUNT_X; // 전체 너비
-        by = bitAni1.bmHeight / SPRITE_FRAME_COUNT_Y; // 전체 높이
-
-        int xStart = curframe * bx;
-        int yStart = 0;
-
-        TransparentBlt(hMemDC, GC.getPlayer().getPosition().x, GC.getPlayer().getPosition().y, 42, 90, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
-
-        SelectObject(hMemDC2, hOldBitmap2);
-        DeleteDC(hMemDC2);
-    }
-    // left
-    else if (GC.getPlayer().getViewDir() == LEFT || GC.getPlayer().getViewDir() == PAUSE)
-    {
-        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hAniImage1);
-        bx = bitAni1.bmWidth / SPRITE_FRAME_COUNT_X; // 전체 너비
-        by = bitAni1.bmHeight / SPRITE_FRAME_COUNT_Y; // 전체 높이
-
-        int xStart = curframe * bx;
-        int yStart = by;
-
-        TransparentBlt(hMemDC, GC.getPlayer().getPosition().x, GC.getPlayer().getPosition().y, 42, 90, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
-
-        SelectObject(hMemDC2, hOldBitmap2);
-        DeleteDC(hMemDC2);
-    }
-    // up
-    else if (GC.getPlayer().getViewDir() == UP || GC.getPlayer().getViewDir() == PAUSE)
-    {
-        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hAniImage2);
-        bx = bitAni2.bmWidth / SPRITE_FRAME_COUNT_X; // 전체 너비
-        by = bitAni2.bmHeight / SPRITE_FRAME_COUNT_Y; // 전체 높이
-
-        int xStart = curframe * bx;
-        int yStart = 0;
-
-        TransparentBlt(hMemDC, GC.getPlayer().getPosition().x, GC.getPlayer().getPosition().y, 42, 90, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
-
-        SelectObject(hMemDC2, hOldBitmap2);
-        DeleteDC(hMemDC2);
-    }
-    // right
-    else if (GC.getPlayer().getViewDir() == RIGHT || GC.getPlayer().getViewDir() == PAUSE)
-    {
-        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hAniImage2);
-        bx = bitAni2.bmWidth / SPRITE_FRAME_COUNT_X; // 전체 너비
-        by = bitAni2.bmHeight / SPRITE_FRAME_COUNT_Y; // 전체 높이
-
-        int xStart = curframe * bx;
-        int yStart = by;
-
-        TransparentBlt(hMemDC, GC.getPlayer().getPosition().x, GC.getPlayer().getPosition().y, 42, 90, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
-
-        SelectObject(hMemDC2, hOldBitmap2);
-        DeleteDC(hMemDC2);
-    }
-    // <<
-
-    // > : stone1
-    {
-        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hStoneImage);
-        bx = bitStone.bmWidth / 24;
-        by = bitStone.bmHeight / 12;
-
-        int xStart = bx * 8; // 가로에 있는 순서대로 출력이 됨
-        int yStart = by;
-        int i = 0;
-
-        for (auto it = GC.getItemList().begin(); it != GC.getItemList().end(); it++)
-        {
-            if (i == 2) break;
-            TransparentBlt(hMemDC, (*it)->getPositionX(), (*it)->getPositionY(), 31, 35, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
-            i++;
-        }
-            
-        SelectObject(hMemDC2, hOldBitmap2);
-        DeleteDC(hMemDC2);
-    }
-    // > : stone2
-    {
-        hMemDC2 = CreateCompatibleDC(hMemDC); // 같은 포맷
-        hOldBitmap2 = (HBITMAP)SelectObject(hMemDC2, hStoneImage);
-        bx = bitStone.bmWidth / 24;
-        by = bitStone.bmHeight / 12;
-
-        int xStart = bx * 14; // 가로에 있는 순서대로 출력이 됨
-        int yStart = by;
-        
-        auto it = GC.getItemList().begin();
-        it++;  it++;
-
-        for (; it != GC.getItemList().end(); it++)
-        {
-            TransparentBlt(hMemDC, (*it)->getPositionX(), (*it)->getPositionY(), 31, 35, hMemDC2, xStart, yStart, bx, by, RGB(0, 0, 0));
-        }
-
-        SelectObject(hMemDC2, hOldBitmap2);
-        DeleteDC(hMemDC2);
-    }
-
-
-    GC.Render(hMemDC);
-
-
-
-    // >> : hdc에 그려주기
-    TransparentBlt(hdc, 0, 0, rectView.right, rectView.bottom, hMemDC, 0, 0, rectView.right, rectView.bottom, RGB(255, 0, 255));
-
-    SelectObject(hMemDC, hOldBitmap);
-    DeleteDC(hMemDC);
-}
-
-void DeleteBitmap()
-{
-    DeleteObject(hAniImage1);
-    DeleteObject(hAniImage2);
-    DeleteObject(hMapImage);
-    DeleteObject(hStoneImage);
-}
-
-void UpdateFrame(HWND hWnd)
-{
-    curframe++;
-    if (curframe > RUN_FRAME_MAX)
-        curframe = RUN_FRAME_MIN;
-}
-
-VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-    if (GC.getPlayer().getViewDir() != PAUSE && idEvent == timer_ID_1)
-    {
-        UpdateFrame(hWnd);
-    }
-}
-
-VOID CALLBACK AniMine(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-    if (idEvent == timer_ID_3)
-    {
-        // 광질 캐는 애니메이션
-        if (GC.isMining(hWnd) == 3)
-        {
-            cout << "animine" << endl;
-        }
-    }
-
-}
-
-
-

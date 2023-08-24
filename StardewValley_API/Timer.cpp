@@ -1,7 +1,8 @@
-#include <cmath>
-#include <Windows.h>
-#include <timeapi.h>
 #include "Timer.h"
+#include <cmath>
+#include <timeapi.h>
+#include "Define.h"
+
 #pragma comment(lib, "winmm.lib")
 
 
@@ -13,8 +14,10 @@ Timer::Timer()
 	QueryPerformanceFrequency((LARGE_INTEGER*)&periodFrequency);
 	// 현재 CPU의 클럭스룰 얻는 함수
 	QueryPerformanceCounter((LARGE_INTEGER*)&lastTime);
-
-	// 컴퓨터는 곱셈연산이 빠르므로 역수로 미리 만듦
+	
+	if (lastTime == NULL)	lastTime = 0;
+	
+	//컴퓨터는 곱셈연산이 빠르므로 역수로 미리 만듦
 	timeScale = 1.0 / (double)periodFrequency;
 	deltaTime = 0;
 	curTime = 0;
@@ -31,7 +34,7 @@ void Timer::Update()
 	lastTime = curTime;
 }
 
-double Timer::getDeltaTime()
+float Timer::getDeltaTime()
 {
 	return deltaTime;
 }
