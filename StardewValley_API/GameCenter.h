@@ -66,9 +66,5 @@ public:
 	void CreateBitmap();
 	void DrawBitmapDoubleBuffering(HWND m_hWnd, HDC hdc);
 	void DeleteBitmap();
-	void UpdateFrame(HWND m_hWnd);
-
-	// 타이머 함수
-	VOID CALLBACK AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 };
 

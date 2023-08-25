@@ -230,18 +230,3 @@ void GameCenter::DeleteBitmap()
 	player.DeleteBitmap();
 	itemList.front()->DeleteBitmap();
 }
-
-void GameCenter::UpdateFrame(HWND hWnd)
-{
-	curframe++;
-	if (curframe > RUN_FRAME_MAX)
-		curframe = RUN_FRAME_MIN;
-}
-
-VOID CALLBACK GameCenter::AniProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-	if (getPlayer().getViewDir() != PAUSE/* && idEvent == timer_ID_1*/)
-	{
-		UpdateFrame(hWnd);
-	}
-}

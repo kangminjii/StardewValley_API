@@ -79,25 +79,28 @@ private:
     //// 더블 버퍼링
 
     // 애니메이션
-    HBITMAP hAniImage1;
-    BITMAP bitAni1;
-    HBITMAP hAniImage2;
-    BITMAP bitAni2;
+    HBITMAP hAniImage;
+    BITMAP bitAni;
 
-    int SPRITE_SIZE_X = 27; // x 길이 256
-    int SPRITE_SIZE_Y = 60; // y 길이 256
+    HBITMAP hShirtImage;
+    BITMAP bitShirt;
+
+
+    int SPRITE_SIZE_X = 12; // x 길이 383
+    int SPRITE_SIZE_Y = 13; // y 길이 671
 
     int RUN_FRAME_MAX = 0;
     int RUN_FRAME_MIN = 0;
     int curframe = RUN_FRAME_MIN;
 
-    int SPRITE_FRAME_COUNT_X = 0;
-    int SPRITE_FRAME_COUNT_Y = 0;
+    float timePerSecond = 0;
 
 public:
     void CreateBitmap();
     void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc);
     void DeleteBitmap();
 
+    // 타이머 함수
+    void UpdateFrame();
 };
 

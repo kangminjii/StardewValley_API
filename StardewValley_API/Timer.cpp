@@ -30,8 +30,9 @@ void Timer::Update()
 	QueryPerformanceCounter((LARGE_INTEGER*)&curTime);
 	// deltaTime(프레임 사이의 시간) = (현재 프레임 진동수 - 이전 프레임 진동수)/초당진동수
 
-	deltaTime = abs((double)(curTime - lastTime) * timeScale);
+	deltaTime = abs((float)(curTime - lastTime) * timeScale);
 	lastTime = curTime;
+
 }
 
 float Timer::getDeltaTime()
