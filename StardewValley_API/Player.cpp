@@ -4,7 +4,7 @@
 Player::Player()
     : position{ 300, 100}, prevPosition{ 0, 0 }, viewDir(NONE), preViewDir(NONE), speed(200.f), distance(0), startRect{ 0,0 }, endRect{ 0,0 },
     isCollidedL(false), isCollidedR(false), isCollidedU(false), isCollidedD(false), cursorPos{ 0, 0 },
-    hAniImage(0), hShirtImage(0)
+    hAniImage(0), hShirtImage(0), hHairImage(0)
 {
     CreateBitmap();
     playerTimer = new Timer;
@@ -27,8 +27,8 @@ void Player::setCollided(bool check, int collidedView)
 
 void Player::CreateBitmap()
 {
-    // >> : animation
-    { // down & left
+    // player animation
+    {
         hAniImage = (HBITMAP)LoadImage(NULL, TEXT("images/player.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 
         if (hAniImage == NULL) // 이미지가 출력되지 않을 때
@@ -40,12 +40,13 @@ void Player::CreateBitmap()
 
         GetObject(hAniImage, sizeof(BITMAP), &bitAni);
 
-        RUN_FRAME_MAX = (bitAni.bmWidth  / 8) / SPRITE_SIZE_X - 2; 
+        RUN_FRAME_MAX = bitAni.bmWidth / 96 - 2;
         RUN_FRAME_MIN = 0;
         curframe = RUN_FRAME_MIN; // 0~2 frame
     }
 
-    { // shirts
+    // shirts
+    {
         hShirtImage = (HBITMAP)LoadImage(NULL, TEXT("images/shirts.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 
         if (hShirtImage == NULL) // 이미지가 출력되지 않을 때
@@ -57,203 +58,216 @@ void Player::CreateBitmap()
 
         GetObject(hShirtImage, sizeof(BITMAP), &bitShirt);
     }
+
+    // hairs
+    {
+        hHairImage = (HBITMAP)LoadImage(NULL, TEXT("images/hair.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+        if (hHairImage == NULL) // 이미지가 출력되지 않을 때
+        {
+            DWORD dwError = GetLastError();
+            MessageBox(NULL, TEXT("애니메이션3 이미지 로드 에러"), TEXT("에러"), MB_OK);
+            return;
+        }
+
+        GetObject(hHairImage, sizeof(BITMAP), &bitHair);
+    }
 }
+
 void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 {
-	HDC hMemDC;
-	HBITMAP hOldBitmap;
-	int bx=0, by=0;
+    HDC hMemDC;
+    hMemDC = CreateCompatibleDC(hdc);
 
-	// down
-	if (getViewDir() == DOWN)
-	{
-		hMemDC = CreateCompatibleDC(hdc);
+    HBITMAP hAniBitmap, hShirtBitmap, hHairBitmap;
 
+    // AniImage 변수
+    int bx1 = bitAni.bmWidth / 23;
+    int by1 = bitAni.bmHeight / 20;
+
+    // 상의 변수
+    int bx2 = bitShirt.bmWidth / 15;
+    int by2 = bitShirt.bmHeight / 27;
+
+    // 머리 변수
+    int bx3 = bitHair.bmWidth / 8; 
+    int by3 = bitHair.bmHeight / 12; 
+
+    //down
+    if (getViewDir() == DOWN)
+    {
         // 몸-바지
-		hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
-		
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
-		int xStart1 = curframe * bx;     // 몸
-        int xStart2 = (curframe + 6) * bx; // 팔
-        int xStart3 = (curframe + 18) * bx; // 바지
-        int yStart = by * 3 - 1;
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart1 = curframe * bx1;           // 몸
+        int xStart2 = (curframe + 18) * bx1;    // 바지
+        int yStart1 = by1 * 3 - 1;
 
-		TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart, bx, by, RGB(0, 0, 0));
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart3, yStart, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
 
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
-       
         // 상의
-        bx = bitAni.bmWidth / 46; // 전체 너비
-        by = bitAni.bmHeight / 92; // 전체 높이
-        int xStart = 0;
-        int yStart1 = 0;
+        hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        int xStart3 = 0;  // *bx2로 상의 변경 가능
+        int yStart3 = 0;
 
-        TransparentBlt(hdc, getPosition().x + 10, getPosition().y + 41, 23, 20, hMemDC, xStart, yStart1, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x + 11, getPosition().y + 40, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
         // 팔
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart4 = (curframe + 6) * bx1;      // 팔
 
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart4, yStart1, bx1, by1, RGB(0, 0, 0));
 
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart, bx, by, RGB(0, 0, 0)); 
+        // 머리
+        hHairBitmap = (HBITMAP)SelectObject(hMemDC, hHairImage);
+        int xStart5 = bx3;
+        int yStart5 = by3 * 6;
 
+        TransparentBlt(hdc, getPosition().x, getPosition().y -15, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
 
-		SelectObject(hMemDC, hOldBitmap);
-		DeleteDC(hMemDC);
-	}
+        SelectObject(hMemDC, hHairBitmap);
+        DeleteDC(hMemDC);
+    }
 	// left
-	else if (getViewDir() == LEFT)
+    else if (getViewDir() == LEFT)
 	{
         ///// 좌우반전필요
-        hMemDC = CreateCompatibleDC(hdc);
-
         // 몸-바지
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
-       
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
-        int xStart1 = (curframe + 2)* bx;     // 몸
-        int xStart2 = (curframe + 8) * bx; // 팔
-        int xStart3 = (curframe + 20) * bx; // 바지
-        int yStart = by * 3 - 1;
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart1 = (curframe + 2)* bx1;     // 몸
+        int xStart2 = (curframe + 20) * bx1; // 바지
+        int yStart1 = by1 * 3 - 1;
 
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart, bx, by, RGB(0, 0, 0));
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart3, yStart, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
 
         // 상의
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        int xStart3 = 0;  // *bx2로 상의 변경 가능
+        int yStart3 = 0;
 
-        bx = bitAni.bmWidth / 46; // 전체 너비
-        by = bitAni.bmHeight / 92; // 전체 높이
-        int xStart = 0;
-        int yStart1 = by * 2;
-
-        TransparentBlt(hdc, getPosition().x + 10, getPosition().y + 41, 23, 20, hMemDC, xStart, yStart1, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x + 11, getPosition().y + 40, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
         // 팔
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart4 = (curframe + 8) * bx1; // 팔
 
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart4, yStart1, bx1, by1, RGB(0, 0, 0));
 
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart, bx, by, RGB(0, 0, 0));
+        // 머리
+        hHairBitmap = (HBITMAP)SelectObject(hMemDC, hHairImage);
+        int xStart5 = bx3;
+        int yStart5 = by3 * 7;
 
+        TransparentBlt(hdc, getPosition().x, getPosition().y - 22, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
 
-        SelectObject(hMemDC, hOldBitmap);
+        SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
 	}
 	// up
 	else if (getViewDir() == UP)
 	{
-        hMemDC = CreateCompatibleDC(hdc);
+        // 몸-바지
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart1 = (curframe + 4) * bx1;     // 몸
+        int xStart2 = (curframe + 22) * bx1;    // 바지
+        int yStart1 = by1 * 3 - 1;
 
-        // 몸-바지-팔
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        cout << "xStart2 : " << xStart2 << " / bx1 : " << bx1 << endl;
+        if (xStart2+bx1 >= bitAni.bmWidth)    xStart2 = bitAni.bmWidth - 16;
 
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
-        int xStart1 = (curframe +4) * bx;     // 몸
-        int xStart2 = (curframe + 10) * bx; // 팔
-        int xStart3 = (curframe + 22) * bx; // 바지
-        int yStart = by * 3 - 1;
-
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart, bx, by, RGB(0, 0, 0));
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart3, yStart, bx, by, RGB(0, 0, 0));
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
 
         // 상의
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        int xStart3 = 0;  // *bx2로 상의 변경 가능
+        int yStart3 = by2 *3;
 
-        bx = bitAni.bmWidth / 46; // 전체 너비
-        by = bitAni.bmHeight / 85; // 전체 높이
-        int xStart = 0;
-        int yStart1 = by * 3;
+        TransparentBlt(hdc, getPosition().x + 10, getPosition().y + 36, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
-        TransparentBlt(hdc, getPosition().x + 10, getPosition().y + 31, 25, 25, hMemDC, xStart, yStart1, bx, by, RGB(0, 0, 0));
+        // 팔
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart4 = (curframe + 10) * bx1; // 팔
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart4, yStart1, bx1, by1, RGB(0, 0, 0));
 
-        SelectObject(hMemDC, hOldBitmap);
+        // 머리
+        hHairBitmap = (HBITMAP)SelectObject(hMemDC, hHairImage);
+        int xStart5 = bx3;
+        int yStart5 = by3 * 8;
+
+        TransparentBlt(hdc, getPosition().x, getPosition().y - 22, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
+
+        SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
 	}
 	// right
 	else if (getViewDir() == RIGHT)
 	{
-        hMemDC = CreateCompatibleDC(hdc);
-
         // 몸-바지
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart1 = (curframe + 2) * bx1;     // 몸
+        int xStart2 = (curframe + 20) * bx1; // 바지
+        int yStart1 = by1 * 3 - 1;
 
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
-        int xStart1 = (curframe + 2)* bx;     // 몸
-        int xStart2 = (curframe + 8) * bx; // 팔
-        int xStart3 = (curframe + 20) * bx; // 바지
-        int yStart = by * 3 - 1;
-
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart, bx, by, RGB(0, 0, 0));
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart3, yStart, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
 
         // 상의
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        int xStart3 = 0;  // *bx2로 상의 변경 가능
+        int yStart3 = 0;
 
-        bx = bitAni.bmWidth / 46; // 전체 너비
-        by = bitAni.bmHeight / 92; // 전체 높이
-        int xStart = 0;
-        int yStart1 = by;
-
-        TransparentBlt(hdc, getPosition().x + 10, getPosition().y + 39, 23, 20, hMemDC, xStart, yStart1, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x + 11, getPosition().y + 40, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
         // 팔
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart4 = (curframe + 8) * bx1; // 팔
 
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart4, yStart1, bx1, by1, RGB(0, 0, 0));
 
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart, bx, by, RGB(0, 0, 0));
+        // 머리
+        hHairBitmap = (HBITMAP)SelectObject(hMemDC, hHairImage);
+        int xStart5 = bx3;
+        int yStart5 = by3 * 7;
 
+        TransparentBlt(hdc, getPosition().x, getPosition().y - 22, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
 
-        SelectObject(hMemDC, hOldBitmap);
+        SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
 	}
     else if (getViewDir() == PAUSE)
     {
-        hMemDC = CreateCompatibleDC(hdc);
-
         // 몸-바지
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart1 = 0;           // 몸
+        int xStart2 = 18 * bx1;    // 바지
+        int yStart1 = 0;
 
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
-        int xStart1 = (curframe + 4) * bx;     // 몸
-        int xStart2 = (curframe + 10) * bx; // 팔
-        int xStart3 = (curframe + 22) * bx; // 바지
-        int yStart = by * 3 - 1;
-
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart, bx, by, RGB(0, 0, 0));
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart3, yStart, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
 
         // 상의
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        int xStart3 = 0;  // *bx2로 상의 변경 가능
+        int yStart3 = 0;
 
-        bx = bitAni.bmWidth / 46; // 전체 너비
-        by = bitAni.bmHeight / 92; // 전체 높이
-        int xStart = 0;
-        int yStart1 = by * 3;
-
-        TransparentBlt(hdc, getPosition().x + 10, getPosition().y + 41, 23, 20, hMemDC, xStart, yStart1, bx, by, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x + 11, getPosition().y + 40, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
         // 팔
-        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart4 = 6 * bx1;   // 팔
 
-        bx = bitAni.bmWidth / 23; // 전체 너비
-        by = bitAni.bmHeight / 20; // 전체 높이
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart4, yStart1, bx1, by1, RGB(0, 0, 0));
 
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart, bx, by, RGB(0, 0, 0));
+        // 머리
+        hHairBitmap = (HBITMAP)SelectObject(hMemDC, hHairImage);
+        int xStart5 = bx3;
+        int yStart5 = by3 * 6;
 
+        TransparentBlt(hdc, getPosition().x, getPosition().y - 15, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
 
-        SelectObject(hMemDC, hOldBitmap);
+        SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
         }
 }
@@ -261,6 +275,7 @@ void Player::DeleteBitmap()
 {
     DeleteObject(hAniImage);
     DeleteObject(hShirtImage);
+    DeleteObject(hHairImage);
 }
 
 void Player::UpdateFrame()
@@ -273,13 +288,25 @@ void Player::UpdateFrame()
 
     cout.precision(1);
     //std::cout << "Time: " << timePerSecond << "s" << std::endl;
-
-    if (getViewDir() != PAUSE && timePerSecond >= 0.3)
+    
+    if (getViewDir() == PAUSE)
     {
-        curframe++;
-        timePerSecond = 0;
+        if (timePerSecond >= 0.5)
+        {
+            curframe++;
+            timePerSecond = 0;
+        }
     }
-    cout << "curframe: " << curframe << endl;
+    else
+    {
+        if (timePerSecond >= 0.3)
+        {
+            curframe++;
+            timePerSecond = 0;
+        }
+    }
+   
+    //cout << "curframe: " << curframe << endl;
     if (curframe > RUN_FRAME_MAX)
         curframe = RUN_FRAME_MIN;
 }
@@ -291,20 +318,20 @@ void Player::Move()
 
     Vec2 pPos = getPosition();
 
-    if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+    if (GetAsyncKeyState('A') & 0x8000)
     {
         viewDir = LEFT;
         // 충돌상태에서 벗어나게하기
         if (preViewDir != viewDir)      setCollided(false, preViewDir);
         
         // 충돌X, 거리 변화O
-        if (!isCollidedL)               pPos.x -= getDistance();
+        if (!isCollidedL)                pPos.x -= getDistance();
         // 충돌O, 충돌체 방향으로 향할때 거리 변화X
         else if (viewDir == preViewDir) setPosition(getPrevPosition());
 
         preViewDir = LEFT;
     }
-    else if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+    else if (GetAsyncKeyState('D') & 0x8000)
     {
         viewDir = RIGHT;
         if (preViewDir != viewDir)      setCollided(false, preViewDir);
@@ -314,7 +341,7 @@ void Player::Move()
 
         preViewDir = RIGHT;
     }
-    else if (GetAsyncKeyState(VK_UP) & 0x8000)
+    else if (GetAsyncKeyState('W') & 0x8000)
     {
         viewDir = UP;
         if (preViewDir != viewDir)      setCollided(false, preViewDir);
@@ -324,7 +351,7 @@ void Player::Move()
 
         preViewDir = UP;
     }
-    else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+    else if (GetAsyncKeyState('S') & 0x8000)
     {
         viewDir = DOWN;
         if (preViewDir != viewDir)      setCollided(false, preViewDir);

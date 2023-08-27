@@ -85,9 +85,8 @@ private:
     HBITMAP hShirtImage;
     BITMAP bitShirt;
 
-
-    int SPRITE_SIZE_X = 12; // x 길이 383
-    int SPRITE_SIZE_Y = 13; // y 길이 671
+    HBITMAP hHairImage;
+    BITMAP bitHair;
 
     int RUN_FRAME_MAX = 0;
     int RUN_FRAME_MIN = 0;
