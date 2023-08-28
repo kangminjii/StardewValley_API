@@ -30,7 +30,7 @@ private:
     POINT cursorPos;
     bool mineTimeChecked;
     bool isMining;
-    int miningCycle = 0;
+    bool miningCycle = false;
 
 public:
     //// 이동 관련

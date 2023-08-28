@@ -396,13 +396,28 @@ void Player::UpdateFrame()
         }
 
         if (curframeMine == 4)
+        {
+            if (!miningCycle)
+            {
+                miningCycle = true;
+                return;
+            }
+            else
+            {
+                mineTimeChecked = true;
+                miningCycle = false;
+            }
+        }
+        
+      /*  if (curframeMine == 4)
             miningCycle++;
-
+        
         if (curframeMine == 4 && miningCycle == 2)
         {
             miningCycle = 0;
             mineTimeChecked = true;
-        }
+        }*/
+        
     }
     else if (getViewDir() == PAUSE)
     { // 현재 멈춰있는 애니메이션이 없음

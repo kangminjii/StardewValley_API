@@ -55,7 +55,7 @@ void GameCenter::isMining(HWND hWnd)
 				if ((*it)->getPosition().y <= player.getCursorPos().y && player.getCursorPos().y <= (*it)->getPosition().y + 32)
 				{
 					// 아이템 삭제
-					player.setMineCheck(false);
+					//player.setMineCheck(false);
 					delete (*it);
 				}
 			}
