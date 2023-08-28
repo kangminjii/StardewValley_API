@@ -1,8 +1,9 @@
 #pragma once
 #pragma comment(lib, "msimg32.lib")
+#include "Define.h"
 #include "Player.h"
 #include "Item.h"
-#include "Define.h"
+#include "Tilemap.h"
 
 class GameCenter
 {
@@ -13,17 +14,10 @@ private:
 	POINT m_ptResolution;	// 메인 윈도우 해상도
 	HDC m_hdc;				// 메인 윈도우에 그릴 DC
 
-	// 더블 버퍼링
-	RECT rectView;
-	HBITMAP hDoubleBufferImage;
-
-	// 배경
-	HBITMAP hMapImage;
-	BITMAP  bitMap;
-
 private:
 	Player player;
 	std::list<Item*> itemList;
+	Tilemap tilemap;
 
 public:
 	// player : 플레이어 객체 불러오기
@@ -34,36 +28,31 @@ public:
 	void setItemList() { addItem(); }
 	std::list<Item*>& getItemList() { return itemList; }
 
-public:
+	// tilemap : 배경의 tile들
+	Tilemap getTilemap() { return tilemap; }
 
+public:
 	// 초기화
 	int Init(HWND g_hWnd, POINT p);
 
 	// 광질하는지 체크
-	int isMining(HWND hWnd);
+	void isMining(HWND hWnd);
 
 	// 아이템 관리
 	void addItem();
 	void deleteItem();
 
-	// >> : 반복적으로 체크해주는 함수
+	// 반복적으로 체크해주는 함수
 	void Update();
 	void OnCollision();
 
+
 //// 더블 버퍼링
 private:
-	int SPRITE_SIZE_X = 27; // x 길이 256
-	int SPRITE_SIZE_Y = 60; // y 길이 256
-
-	int RUN_FRAME_MAX = 0;
-	int RUN_FRAME_MIN = 0;
-	int curframe = RUN_FRAME_MIN;
-
-	int SPRITE_FRAME_COUNT_X = 0;
-	int SPRITE_FRAME_COUNT_Y = 0;
+	RECT rectView;
+	HBITMAP hDoubleBufferImage;
 
 public:
-	void CreateBitmap();
 	void DrawBitmapDoubleBuffering(HWND m_hWnd, HDC hdc);
 	void DeleteBitmap();
 };

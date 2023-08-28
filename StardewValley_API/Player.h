@@ -9,7 +9,6 @@ enum view { LEFT, RIGHT, UP, DOWN, PAUSE, NONE };
 class Player
 {
 private:
-
     Timer* playerTimer;
 
 	Vec2 position;
@@ -29,9 +28,11 @@ private:
     bool isCollidedD;
 
     POINT cursorPos;
+    bool mineTimeChecked;
+    bool isMining;
+    int miningCycle = 0;
 
 public:
-
     //// 이동 관련
     // position : 플레이어 위치
     void setPosition(Vec2 pos) { position = pos; }
@@ -65,6 +66,12 @@ public:
     void setCursorPos(int x, int y) { cursorPos.x = x; cursorPos.y = y; }
     POINT getCursorPos() { return cursorPos; }
 
+    // minecheck : 광석이 없어질 타이밍을 위한 flag
+    void setMineCheck(bool mine) { mineTimeChecked = mine; }
+    bool getMineCheck() { return mineTimeChecked; }
+
+
+
 public:
     Player();
     ~Player();
@@ -81,22 +88,27 @@ private:
     // 애니메이션
     HBITMAP hAniImage;
     BITMAP bitAni;
+    HBITMAP hAniLeftImage;
+    BITMAP bitAniLeft;
 
     HBITMAP hShirtImage;
     BITMAP bitShirt;
 
     HBITMAP hHairImage;
     BITMAP bitHair;
+    HBITMAP hHairLeftImage;
+    BITMAP bitHairLeft;
 
-    int RUN_FRAME_MAX = 0;
-    int RUN_FRAME_MIN = 0;
-    int curframe = RUN_FRAME_MIN;
-
+    int curframe = 0;
+    int curframeMine = 0;
     float timePerSecond = 0;
+
+    HBITMAP hToolImage;
+    BITMAP bitTool;
 
 public:
     void CreateBitmap();
-    void DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc);
+    void DrawBitmapDoubleBuffering(HDC hdc);
     void DeleteBitmap();
 
     // 타이머 함수

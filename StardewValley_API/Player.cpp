@@ -2,9 +2,9 @@
 #include "Player.h"
 
 Player::Player()
-    : position{ 300, 100}, prevPosition{ 0, 0 }, viewDir(NONE), preViewDir(NONE), speed(200.f), distance(0), startRect{ 0,0 }, endRect{ 0,0 },
-    isCollidedL(false), isCollidedR(false), isCollidedU(false), isCollidedD(false), cursorPos{ 0, 0 },
-    hAniImage(0), hShirtImage(0), hHairImage(0)
+    : position{ 300, 100 }, prevPosition{ 0, 0 }, viewDir(NONE), preViewDir(NONE), speed(250.f), distance(0), startRect{ 0,0 }, endRect{ 0,0 },
+    isCollidedL(false), isCollidedR(false), isCollidedU(false), isCollidedD(false), cursorPos{ 0, 0 }, mineTimeChecked(false), isMining(false),
+    hAniImage(0), hAniLeftImage(0), hShirtImage(0), hHairImage(0), hHairLeftImage(0)
 {
     CreateBitmap();
     playerTimer = new Timer;
@@ -40,9 +40,23 @@ void Player::CreateBitmap()
 
         GetObject(hAniImage, sizeof(BITMAP), &bitAni);
 
-        RUN_FRAME_MAX = bitAni.bmWidth / 96 - 2;
-        RUN_FRAME_MIN = 0;
-        curframe = RUN_FRAME_MIN; // 0~2 frame
+        curframe = 0; // 0~2 frame
+        curframeMine = 0; // 0~4 frame
+    }
+    // player animation > 좌우반전시킨 버전
+    {
+        hAniLeftImage = (HBITMAP)LoadImage(NULL, TEXT("images/playerLeft.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+        if (hAniImage == NULL) // 이미지가 출력되지 않을 때
+        {
+            DWORD dwError = GetLastError();
+            MessageBox(NULL, TEXT("애니메이션1-1 이미지 로드 에러"), TEXT("에러"), MB_OK);
+            return;
+        }
+
+        GetObject(hAniLeftImage, sizeof(BITMAP), &bitAniLeft);
+
+        curframe = 0; // 0~2 frame
     }
 
     // shirts
@@ -52,7 +66,7 @@ void Player::CreateBitmap()
         if (hShirtImage == NULL) // 이미지가 출력되지 않을 때
         {
             DWORD dwError = GetLastError();
-            MessageBox(NULL, TEXT("애니메이션2 이미지 로드 에러"), TEXT("에러"), MB_OK);
+            MessageBox(NULL, TEXT("상의 이미지 로드 에러"), TEXT("에러"), MB_OK);
             return;
         }
 
@@ -66,20 +80,47 @@ void Player::CreateBitmap()
         if (hHairImage == NULL) // 이미지가 출력되지 않을 때
         {
             DWORD dwError = GetLastError();
-            MessageBox(NULL, TEXT("애니메이션3 이미지 로드 에러"), TEXT("에러"), MB_OK);
+            MessageBox(NULL, TEXT("머리 이미지 로드 에러"), TEXT("에러"), MB_OK);
             return;
         }
 
         GetObject(hHairImage, sizeof(BITMAP), &bitHair);
     }
+    // hairs > 좌우반전시킨 버전
+    {
+        hHairLeftImage = (HBITMAP)LoadImage(NULL, TEXT("images/hairLeft.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+        if (hHairLeftImage == NULL) // 이미지가 출력되지 않을 때
+        {
+            DWORD dwError = GetLastError();
+            MessageBox(NULL, TEXT("머리반전 이미지 로드 에러"), TEXT("에러"), MB_OK);
+            return;
+        }
+
+        GetObject(hHairLeftImage, sizeof(BITMAP), &bitHairLeft);
+    }
+
+    // Tools
+    {
+        hToolImage = (HBITMAP)LoadImage(NULL, TEXT("images/tools.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+        if (hToolImage == NULL) // 이미지가 출력되지 않을 때
+        {
+            DWORD dwError = GetLastError();
+            MessageBox(NULL, TEXT("도구 이미지 로드 에러"), TEXT("에러"), MB_OK);
+            return;
+        }
+
+        GetObject(hToolImage, sizeof(BITMAP), &bitTool);
+    }
 }
 
-void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
+void Player::DrawBitmapDoubleBuffering(HDC hdc)
 {
-    HDC hMemDC;
-    hMemDC = CreateCompatibleDC(hdc);
+    HDC hMemDC = CreateCompatibleDC(hdc);
 
-    HBITMAP hAniBitmap, hShirtBitmap, hHairBitmap;
+    HBITMAP hAniBitmap, hAniLeftBitmap, hShirtBitmap, hHairBitmap, hHairLeftBitmap;
+    HBITMAP hToolBitmap;
 
     // AniImage 변수
     int bx1 = bitAni.bmWidth / 23;
@@ -90,9 +131,14 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
     int by2 = bitShirt.bmHeight / 27;
 
     // 머리 변수
-    int bx3 = bitHair.bmWidth / 8; 
-    int by3 = bitHair.bmHeight / 12; 
+    int bx3 = bitHair.bmWidth / 8;
+    int by3 = bitHair.bmHeight / 12;
 
+    // 도구 변수
+    int bx4 = bitTool.bmWidth / 21;
+    int by4 = bitTool.bmHeight / 12;
+
+    //// 움직임 애니메이션
     //down
     if (getViewDir() == DOWN)
     {
@@ -123,19 +169,18 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         int xStart5 = bx3;
         int yStart5 = by3 * 6;
 
-        TransparentBlt(hdc, getPosition().x, getPosition().y -15, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y - 15, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
 
         SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
     }
-	// left
+    // left
     else if (getViewDir() == LEFT)
-	{
-        ///// 좌우반전필요
+    {
         // 몸-바지
-        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
-        int xStart1 = (curframe + 2)* bx1;     // 몸
-        int xStart2 = (curframe + 20) * bx1; // 바지
+        hAniLeftBitmap = (HBITMAP)SelectObject(hMemDC, hAniLeftImage);
+        int xStart1 = (curframe + 20) * bx1;     // 몸
+        int xStart2 = (curframe + 2) * bx1; // 바지
         int yStart1 = by1 * 3 - 1;
 
         TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
@@ -144,37 +189,36 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         // 상의
         hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
         int xStart3 = 0;  // *bx2로 상의 변경 가능
-        int yStart3 = 0;
+        int yStart3 = by2 * 2;
 
         TransparentBlt(hdc, getPosition().x + 11, getPosition().y + 40, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
         // 팔
-        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
-        int xStart4 = (curframe + 8) * bx1; // 팔
+        hAniLeftBitmap = (HBITMAP)SelectObject(hMemDC, hAniLeftImage);
+        int xStart4 = (curframe + 14) * bx1; // 팔
 
         TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart4, yStart1, bx1, by1, RGB(0, 0, 0));
 
         // 머리
-        hHairBitmap = (HBITMAP)SelectObject(hMemDC, hHairImage);
-        int xStart5 = bx3;
+        hHairLeftBitmap = (HBITMAP)SelectObject(hMemDC, hHairLeftImage);
+        int xStart5 = bx3 * 6;
         int yStart5 = by3 * 7;
 
         TransparentBlt(hdc, getPosition().x, getPosition().y - 22, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
 
-        SelectObject(hMemDC, hHairBitmap);
+        SelectObject(hMemDC, hHairLeftBitmap);
         DeleteDC(hMemDC);
-	}
-	// up
-	else if (getViewDir() == UP)
-	{
+    }
+    // up
+    else if (getViewDir() == UP)
+    {
         // 몸-바지
         hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
         int xStart1 = (curframe + 4) * bx1;     // 몸
         int xStart2 = (curframe + 22) * bx1;    // 바지
         int yStart1 = by1 * 3 - 1;
 
-        cout << "xStart2 : " << xStart2 << " / bx1 : " << bx1 << endl;
-        if (xStart2+bx1 >= bitAni.bmWidth)    xStart2 = bitAni.bmWidth - 16;
+        if (xStart2 + bx1 >= bitAni.bmWidth)    xStart2 = bitAni.bmWidth - 16;
 
         TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
         TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
@@ -182,7 +226,7 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         // 상의
         hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
         int xStart3 = 0;  // *bx2로 상의 변경 가능
-        int yStart3 = by2 *3;
+        int yStart3 = by2 * 3;
 
         TransparentBlt(hdc, getPosition().x + 10, getPosition().y + 36, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
@@ -200,10 +244,10 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 
         SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
-	}
-	// right
-	else if (getViewDir() == RIGHT)
-	{
+    }
+    // right
+    else if (getViewDir() == RIGHT)
+    {
         // 몸-바지
         hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
         int xStart1 = (curframe + 2) * bx1;     // 몸
@@ -211,14 +255,14 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
         int yStart1 = by1 * 3 - 1;
 
         TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
-        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x - 2, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
 
         // 상의
         hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
         int xStart3 = 0;  // *bx2로 상의 변경 가능
-        int yStart3 = 0;
+        int yStart3 = by2;
 
-        TransparentBlt(hdc, getPosition().x + 11, getPosition().y + 40, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x + 8, getPosition().y + 40, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
 
         // 팔
         hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
@@ -235,8 +279,8 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 
         SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
-	}
-    else if (getViewDir() == PAUSE)
+    }
+    else if (!isMining && getViewDir() == PAUSE)
     {
         // 몸-바지
         hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
@@ -269,13 +313,64 @@ void Player::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 
         SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
-        }
+    }
+
+    //// 광질 애니메이션
+    if (isMining)
+    {
+        // Right
+        // 몸-바지
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart1 = curframeMine * bx1;           // 몸
+        int xStart2 = (curframeMine + 18) * bx1;    // 바지
+        int yStart1 = by1 * 8 - 6;
+
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart1, yStart1, bx1, by1, RGB(0, 0, 0));
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart2, yStart1, bx1, by1, RGB(0, 0, 0));
+
+        // 상의
+        hShirtBitmap = (HBITMAP)SelectObject(hMemDC, hShirtImage);
+        int xStart3 = 0;  // *bx2로 상의 변경 가능
+        int yStart3 = by2;
+
+        if(curframeMine == 4)
+            TransparentBlt(hdc, getPosition().x + 8, getPosition().y + 40 - 2 * 4, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
+        else
+            TransparentBlt(hdc, getPosition().x + 8, getPosition().y + 40 - curframeMine * 4, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
+
+        // 도구
+        hToolBitmap = (HBITMAP)SelectObject(hMemDC, hToolImage);
+        int xStart6 = bx4 * 2;
+        int yStart6 = by4 * 3;
+        TransparentBlt(hdc, getPosition().x + 20, getPosition().y - 20, 33, 75, hMemDC, xStart6, yStart6, bx4, by4, RGB(0, 0, 0));
+
+        // 팔
+        hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
+        int xStart4 = (curframeMine + 6) * bx1;      // 팔
+
+        TransparentBlt(hdc, getPosition().x, getPosition().y, 44, 100, hMemDC, xStart4, yStart1, bx1, by1, RGB(0, 0, 0));
+
+        // 머리
+        hHairBitmap = (HBITMAP)SelectObject(hMemDC, hHairImage);
+        int xStart5 = bx3;
+        int yStart5 = by3 * 7;
+
+        if(curframeMine == 4)
+            TransparentBlt(hdc, getPosition().x, getPosition().y - 22 - 2 * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
+        else
+            TransparentBlt(hdc, getPosition().x - 4, getPosition().y - 26 - curframeMine * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
+
+        SelectObject(hMemDC, hHairBitmap);
+        DeleteDC(hMemDC);
+    }
 }
 void Player::DeleteBitmap()
 {
     DeleteObject(hAniImage);
+    DeleteObject(hAniLeftImage);
     DeleteObject(hShirtImage);
     DeleteObject(hHairImage);
+    DeleteObject(hHairLeftImage);
 }
 
 void Player::UpdateFrame()
@@ -287,28 +382,49 @@ void Player::UpdateFrame()
     timePerSecond += playerTimer->getDeltaTime();
 
     cout.precision(1);
-    //std::cout << "Time: " << timePerSecond << "s" << std::endl;
-    
-    if (getViewDir() == PAUSE)
+    //cout << "Time: " << timePerSecond << "s" << std::endl;
+
+    if (isMining)
     {
-        if (timePerSecond >= 0.5)
+        isMining = false;
+
+        if (timePerSecond >= 0.15)
+        {
+            cout << "curframeMine : " << curframeMine << endl;
+            curframeMine++;
+            timePerSecond = 0;
+        }
+
+        if (curframeMine == 4)
+            miningCycle++;
+
+        if (curframeMine == 4 && miningCycle == 2)
+        {
+            miningCycle = 0;
+            mineTimeChecked = true;
+        }
+    }
+    else if (getViewDir() == PAUSE)
+    { // 현재 멈춰있는 애니메이션이 없음
+        if (timePerSecond >= 1.5)
         {
             curframe++;
             timePerSecond = 0;
         }
     }
     else
-    {
+    {   // 움직일때
         if (timePerSecond >= 0.3)
         {
             curframe++;
             timePerSecond = 0;
         }
     }
-   
-    //cout << "curframe: " << curframe << endl;
-    if (curframe > RUN_FRAME_MAX)
-        curframe = RUN_FRAME_MIN;
+
+    if (curframe > 2)
+        curframe = 0;
+    if (curframeMine > 4)
+        curframeMine = 0;
 }
 
 void Player::Move()
@@ -323,7 +439,7 @@ void Player::Move()
         viewDir = LEFT;
         // 충돌상태에서 벗어나게하기
         if (preViewDir != viewDir)      setCollided(false, preViewDir);
-        
+
         // 충돌X, 거리 변화O
         if (!isCollidedL)                pPos.x -= getDistance();
         // 충돌O, 충돌체 방향으로 향할때 거리 변화X
@@ -359,7 +475,7 @@ void Player::Move()
         if (!isCollidedD)               pPos.y += getDistance();
         else if (viewDir == preViewDir) setPosition(getPrevPosition());
 
-       preViewDir = DOWN;
+        preViewDir = DOWN;
     }
     else
         viewDir = PAUSE;
@@ -372,18 +488,19 @@ void Player::Click(HWND hWnd)
 {
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
+        //cout << "mousePos : " << cursorPos.x << ", " << cursorPos.y << endl;
+
+        isMining = true;
         GetCursorPos(&cursorPos);
         ScreenToClient(hWnd, &cursorPos);
-        cout << "mousePos : " << cursorPos.x << ", " << cursorPos.y << endl;
     }
-    
-    //if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
+    else
+        curframeMine = 0;
 }
 
 void Player::UpdatePlayer()
 {
     Move();
     UpdateFrame();
-    setRect({ (LONG)getPosition().x - 1, (LONG)getPosition().y + 5, }, { (LONG)getPosition().x + 43, (LONG)getPosition().y + 80 });
+    setRect({ (LONG)getPosition().x - 1, (LONG)getPosition().y + 5, }, { (LONG)getPosition().x + 43, (LONG)getPosition().y + 95 });
 }
-

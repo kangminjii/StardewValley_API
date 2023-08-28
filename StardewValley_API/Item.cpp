@@ -3,7 +3,7 @@
 
 
 Item::Item()
-	: position{0, 0}, startRect{0, 0}, endRect{0, 0}, mineCount(0), paintType(EMPTY), hStoneImage(0)
+	: position{0, 0}, startRect{0, 0}, endRect{0, 0}, paintType(EMPTY), hStoneImage(0)
 {
 	CreateBitmap();
 }
@@ -12,12 +12,11 @@ Item::~Item()
 {}
 
 Item::Item(POINT startLocation, int pt)
-	: mineCount(0)
 {
 	CreateBitmap();
 	position = startLocation;
 	paintType = pt;
-	setRect({ getPositionX() - 4, getPositionY() }, { getPositionX() + 34, getPositionY() + 32 });
+	setRect({ getPosition().x - 4, getPosition().y }, { getPosition().x + 34, getPosition().y + 32 });
 }
 
 void Item::CreateBitmap()
@@ -34,7 +33,7 @@ void Item::CreateBitmap()
 	GetObject(hStoneImage, sizeof(BITMAP), &bitStone);
 }
 
-void Item::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
+void Item::DrawBitmapDoubleBuffering(HDC hdc)
 {
 	HDC hMemDC;
 	HBITMAP hOldBitmap;
@@ -51,7 +50,7 @@ void Item::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 		int xStart = bx * 8; // 가로에 있는 순서대로 출력이 됨
 		int yStart = by;
 
-		TransparentBlt(hdc, getPositionX(), getPositionY(), 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
+		TransparentBlt(hdc, getPosition().x, getPosition().y, 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
 
 		SelectObject(hMemDC, hOldBitmap);
 		DeleteDC(hMemDC);
@@ -66,7 +65,7 @@ void Item::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 		int xStart = bx * 14; // 가로에 있는 순서대로 출력이 됨
 		int yStart = by;
 
-		TransparentBlt(hdc, getPositionX(),getPositionY(), 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
+		TransparentBlt(hdc, getPosition().x,getPosition().y, 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
 
 		SelectObject(hMemDC, hOldBitmap);
 		DeleteDC(hMemDC);

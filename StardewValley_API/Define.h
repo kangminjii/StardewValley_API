@@ -2,8 +2,11 @@
 #include <iostream>
 #include <Windows.h>
 #include <list>
+#include <vector>
 #include "Timer.h"
 #include "Struct.h"
+
+using namespace std;
 
 // ΩÃ±€≈Ê ∆–≈œ
 #define MyCore(type)\

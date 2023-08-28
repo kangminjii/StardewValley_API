@@ -56,17 +56,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_STARDEWVALLEYAPI));
 
     MSG msg;
-
-    //// 기본 메시지 루프입니다:
-    //while (GetMessage(&msg, nullptr, 0, 0))
-    //{
-    //    if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-    //    {
-    //        TranslateMessage(&msg);
-    //        DispatchMessage(&msg);
-    //    }
-    //}
-
+   
     // PeekMessage를 통해 메시지가 들어올때 바로 사용되게끔 작동시킴
     while (true)
     {
@@ -84,7 +74,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             // 게임 코드 동작 부분
             GameCenter::GetInstance()->Update();
-            InvalidateRect(g_hWnd, NULL, FALSE);
+            //InvalidateRect(g_hWnd, NULL,FALSE);
         }
     }
    
