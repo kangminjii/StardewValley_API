@@ -14,6 +14,9 @@ private:
 	HBITMAP hMapImage;
 	BITMAP  bitMap;
 
+	HBITMAP hBackImage;
+	BITMAP  bitBack;
+
 public:
 	// Tile
 	void setTiles();
@@ -30,6 +33,13 @@ public:
 	void CreateBitmap();
 	void DrawBitmapDoubleBuffering(HDC hdc);
 	void DeleteBitmap();
+
+
+	// 타일맵 파일에 저장
+public:
+	void SaveTile();
+	void LoadTile();
+
 
 
 };

@@ -3,7 +3,7 @@
 
 Player::Player()
     : position{ 300, 100 }, prevPosition{ 0, 0 }, viewDir(NONE), preViewDir(NONE), speed(250.f), distance(0), startRect{ 0,0 }, endRect{ 0,0 },
-    isCollidedL(false), isCollidedR(false), isCollidedU(false), isCollidedD(false), cursorPos{ 0, 0 }, mineTimeChecked(false), isMining(false),
+    isCollidedL(false), isCollidedR(false), isCollidedU(false), isCollidedD(false), cursorPos{ 0, 0 }, mineTimeChecked(false), isMining(false), miningCycle(0),
     hAniImage(0), hAniLeftImage(0), hShirtImage(0), hHairImage(0), hHairLeftImage(0)
 {
     CreateBitmap();
@@ -40,7 +40,7 @@ void Player::CreateBitmap()
 
         GetObject(hAniImage, sizeof(BITMAP), &bitAni);
 
-        curframe = 0; // 0~2 frame
+        curframe = 0; // 0~1 frame
         curframeMine = 0; // 0~4 frame
     }
     // player animation > 좌우반전시킨 버전
@@ -56,7 +56,7 @@ void Player::CreateBitmap()
 
         GetObject(hAniLeftImage, sizeof(BITMAP), &bitAniLeft);
 
-        curframe = 0; // 0~2 frame
+        curframe = 0; // 0~1 frame
     }
 
     // shirts
@@ -113,6 +113,8 @@ void Player::CreateBitmap()
 
         GetObject(hToolImage, sizeof(BITMAP), &bitTool);
     }
+
+    
 }
 
 void Player::DrawBitmapDoubleBuffering(HDC hdc)
@@ -314,9 +316,8 @@ void Player::DrawBitmapDoubleBuffering(HDC hdc)
         SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
     }
-
     //// 광질 애니메이션
-    if (isMining)
+    else if (isMining)
     {
         // Right
         // 몸-바지
@@ -342,7 +343,8 @@ void Player::DrawBitmapDoubleBuffering(HDC hdc)
         hToolBitmap = (HBITMAP)SelectObject(hMemDC, hToolImage);
         int xStart6 = bx4 * 2;
         int yStart6 = by4 * 3;
-        TransparentBlt(hdc, getPosition().x + 20, getPosition().y - 20, 33, 75, hMemDC, xStart6, yStart6, bx4, by4, RGB(0, 0, 0));
+
+        TransparentBlt(hdc, getPosition().x + 40, getPosition().y - 20, 33, 75, hMemDC, xStart6, yStart6, bx4, by4, RGB(0, 0, 0));
 
         // 팔
         hAniBitmap = (HBITMAP)SelectObject(hMemDC, hAniImage);
@@ -356,14 +358,18 @@ void Player::DrawBitmapDoubleBuffering(HDC hdc)
         int yStart5 = by3 * 7;
 
         if(curframeMine == 4)
-            TransparentBlt(hdc, getPosition().x, getPosition().y - 22 - 2 * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
+            TransparentBlt(hdc, getPosition().x, getPosition().y - 24 - 2 * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
         else
-            TransparentBlt(hdc, getPosition().x - 4, getPosition().y - 26 - curframeMine * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
+            TransparentBlt(hdc, getPosition().x - 4, getPosition().y - 24 - curframeMine * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
 
         SelectObject(hMemDC, hHairBitmap);
         DeleteDC(hMemDC);
     }
+
+    
+  
 }
+
 void Player::DeleteBitmap()
 {
     DeleteObject(hAniImage);
@@ -381,9 +387,6 @@ void Player::UpdateFrame()
 
     timePerSecond += playerTimer->getDeltaTime();
 
-    cout.precision(1);
-    //cout << "Time: " << timePerSecond << "s" << std::endl;
-
     if (isMining)
     {
         isMining = false;
@@ -392,32 +395,18 @@ void Player::UpdateFrame()
         {
             cout << "curframeMine : " << curframeMine << endl;
             curframeMine++;
+
+            if (curframeMine == 4)
+                miningCycle++;
+
             timePerSecond = 0;
         }
-
-        if (curframeMine == 4)
-        {
-            if (!miningCycle)
-            {
-                miningCycle = true;
-                return;
-            }
-            else
-            {
-                mineTimeChecked = true;
-                miningCycle = false;
-            }
-        }
-        
-      /*  if (curframeMine == 4)
-            miningCycle++;
         
         if (curframeMine == 4 && miningCycle == 2)
         {
             miningCycle = 0;
             mineTimeChecked = true;
-        }*/
-        
+        }
     }
     else if (getViewDir() == PAUSE)
     { // 현재 멈춰있는 애니메이션이 없음
@@ -436,7 +425,7 @@ void Player::UpdateFrame()
         }
     }
 
-    if (curframe > 2)
+    if (curframe > 1)
         curframe = 0;
     if (curframeMine > 4)
         curframeMine = 0;
@@ -453,7 +442,8 @@ void Player::Move()
     {
         viewDir = LEFT;
         // 충돌상태에서 벗어나게하기
-        if (preViewDir != viewDir)      setCollided(false, preViewDir);
+        if(preViewDir != PAUSE && preViewDir != viewDir)
+            setCollided(false, preViewDir);
 
         // 충돌X, 거리 변화O
         if (!isCollidedL)                pPos.x -= getDistance();
@@ -492,8 +482,11 @@ void Player::Move()
 
         preViewDir = DOWN;
     }
-    else
+    else // pause
+    {
         viewDir = PAUSE;
+        preViewDir = PAUSE;
+    }
 
     if (viewDir != PAUSE)
         setPosition(pPos);
@@ -503,8 +496,6 @@ void Player::Click(HWND hWnd)
 {
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
-        //cout << "mousePos : " << cursorPos.x << ", " << cursorPos.y << endl;
-
         isMining = true;
         GetCursorPos(&cursorPos);
         ScreenToClient(hWnd, &cursorPos);

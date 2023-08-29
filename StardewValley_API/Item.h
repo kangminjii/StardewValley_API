@@ -1,7 +1,7 @@
 #pragma once
 #include "Define.h"
 
-enum itemType { stone1, stone2, EMPTY};
+enum itemType { stone1, stone2, stone3, EMPTY};
 
 class Item
 {

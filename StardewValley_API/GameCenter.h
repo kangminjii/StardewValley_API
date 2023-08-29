@@ -52,8 +52,18 @@ private:
 	RECT rectView;
 	HBITMAP hDoubleBufferImage;
 
+	// 인벤토리
+	HBITMAP hInvenImage;
+	BITMAP bitInven;
+
 public:
 	void DrawBitmapDoubleBuffering(HWND m_hWnd, HDC hdc);
 	void DeleteBitmap();
+
+
+	// 씬 읽어오기
+public:
+	void SaveTile();
+	void LoadTile();
 };
 

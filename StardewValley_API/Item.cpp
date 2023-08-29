@@ -47,7 +47,7 @@ void Item::DrawBitmapDoubleBuffering(HDC hdc)
 		bx = bitStone.bmWidth / 24;
 		by = bitStone.bmHeight / 12;
 
-		int xStart = bx * 8; // 가로에 있는 순서대로 출력이 됨
+		int xStart = bx * 4; // 가로에 있는 순서대로 출력이 됨
 		int yStart = by;
 
 		TransparentBlt(hdc, getPosition().x, getPosition().y, 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
@@ -55,17 +55,32 @@ void Item::DrawBitmapDoubleBuffering(HDC hdc)
 		SelectObject(hMemDC, hOldBitmap);
 		DeleteDC(hMemDC);
 	}
-	if(this->paintType == stone2)
+	else if(this->paintType == stone2)
 	{
-		hMemDC = CreateCompatibleDC(hdc); // 같은 포맷
+		hMemDC = CreateCompatibleDC(hdc); 
+		hOldBitmap = (HBITMAP)SelectObject(hMemDC, hStoneImage);
+		bx = bitStone.bmWidth / 24;
+		by = bitStone.bmHeight / 12 - 1;
+
+		int xStart = bx * 6; 
+		int yStart = by;
+
+		TransparentBlt(hdc, getPosition().x, getPosition().y, 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
+
+		SelectObject(hMemDC, hOldBitmap);
+		DeleteDC(hMemDC);
+	}
+	else if (this->paintType == stone3)
+	{
+		hMemDC = CreateCompatibleDC(hdc);
 		hOldBitmap = (HBITMAP)SelectObject(hMemDC, hStoneImage);
 		bx = bitStone.bmWidth / 24;
 		by = bitStone.bmHeight / 12;
 
-		int xStart = bx * 14; // 가로에 있는 순서대로 출력이 됨
+		int xStart = bx * 8;
 		int yStart = by;
 
-		TransparentBlt(hdc, getPosition().x,getPosition().y, 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
+		TransparentBlt(hdc, getPosition().x, getPosition().y, 31, 35, hMemDC, xStart, yStart, bx, by, RGB(0, 0, 0));
 
 		SelectObject(hMemDC, hOldBitmap);
 		DeleteDC(hMemDC);

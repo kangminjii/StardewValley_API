@@ -30,7 +30,8 @@ private:
     POINT cursorPos;
     bool mineTimeChecked;
     bool isMining;
-    bool miningCycle = false;
+    //bool miningCycle;
+    int miningCycle;
 
 public:
     //// 이동 관련
@@ -105,6 +106,8 @@ private:
 
     HBITMAP hToolImage;
     BITMAP bitTool;
+
+    
 
 public:
     void CreateBitmap();
