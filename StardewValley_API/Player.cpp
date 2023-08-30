@@ -2,7 +2,7 @@
 #include "Player.h"
 
 Player::Player()
-    : position{ 300, 100 }, prevPosition{ 0, 0 }, viewDir(NONE), preViewDir(NONE), speed(250.f), distance(0), startRect{ 0,0 }, endRect{ 0,0 },
+    : position{ 300, 100 }, prevPosition{ 0, 0 }, viewDir(NONE)/*, preViewDir(NONE),*/, speed(250.f), distance(0), startRect{ 0,0 }, endRect{ 0,0 },
     isCollidedL(false), isCollidedR(false), isCollidedU(false), isCollidedD(false), cursorPos{ 0, 0 }, mineTimeChecked(false), isMining(false), miningCycle(0),
     hAniImage(0), hAniLeftImage(0), hShirtImage(0), hHairImage(0), hHairLeftImage(0)
 {
@@ -114,7 +114,7 @@ void Player::CreateBitmap()
         GetObject(hToolImage, sizeof(BITMAP), &bitTool);
     }
 
-    
+
 }
 
 void Player::DrawBitmapDoubleBuffering(HDC hdc)
@@ -334,7 +334,7 @@ void Player::DrawBitmapDoubleBuffering(HDC hdc)
         int xStart3 = 0;  // *bx2로 상의 변경 가능
         int yStart3 = by2;
 
-        if(curframeMine == 4)
+        if (curframeMine == 4)
             TransparentBlt(hdc, getPosition().x + 8, getPosition().y + 40 - 2 * 4, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
         else
             TransparentBlt(hdc, getPosition().x + 8, getPosition().y + 40 - curframeMine * 4, 23, 21, hMemDC, xStart3, yStart3, bx2, by2, RGB(0, 0, 0));
@@ -357,7 +357,7 @@ void Player::DrawBitmapDoubleBuffering(HDC hdc)
         int xStart5 = bx3;
         int yStart5 = by3 * 7;
 
-        if(curframeMine == 4)
+        if (curframeMine == 4)
             TransparentBlt(hdc, getPosition().x, getPosition().y - 24 - 2 * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
         else
             TransparentBlt(hdc, getPosition().x - 4, getPosition().y - 24 - curframeMine * 4, 44, 85, hMemDC, xStart5, yStart5, bx3, by3, RGB(0, 0, 0));
@@ -366,8 +366,8 @@ void Player::DrawBitmapDoubleBuffering(HDC hdc)
         DeleteDC(hMemDC);
     }
 
-    
-  
+
+
 }
 
 void Player::DeleteBitmap()
@@ -401,7 +401,7 @@ void Player::UpdateFrame()
 
             timePerSecond = 0;
         }
-        
+
         if (curframeMine == 4 && miningCycle == 2)
         {
             miningCycle = 0;
@@ -437,55 +437,49 @@ void Player::Move()
     setDistance(speed * playerTimer->getDeltaTime());
 
     Vec2 pPos = getPosition();
+    Vec2 distance = pPos - 5;
 
     if (GetAsyncKeyState('A') & 0x8000)
     {
         viewDir = LEFT;
-        // 충돌상태에서 벗어나게하기
-        if(preViewDir != PAUSE && preViewDir != viewDir)
-            setCollided(false, preViewDir);
 
-        // 충돌X, 거리 변화O
-        if (!isCollidedL)                pPos.x -= getDistance();
-        // 충돌O, 충돌체 방향으로 향할때 거리 변화X
-        else if (viewDir == preViewDir) setPosition(getPrevPosition());
-
-        preViewDir = LEFT;
+        if (!isCollidedL)    // 충돌X, 거리 변화O
+            pPos.x -= getDistance();
+        else            // 충돌O, 이전 위치 반대값으로 위치 설정
+            pPos.x += 3;
+        
+        setCollided(false, viewDir); //충돌상태에서 벗어나게하기
     }
     else if (GetAsyncKeyState('D') & 0x8000)
     {
         viewDir = RIGHT;
-        if (preViewDir != viewDir)      setCollided(false, preViewDir);
 
-        if (!isCollidedR)               pPos.x += getDistance();
-        else if (viewDir == preViewDir) setPosition(getPrevPosition());
+        if (!isCollidedR)   pPos.x += getDistance();
+        else                pPos.x -= 3;
 
-        preViewDir = RIGHT;
+        setCollided(false, viewDir);
     }
     else if (GetAsyncKeyState('W') & 0x8000)
     {
         viewDir = UP;
-        if (preViewDir != viewDir)      setCollided(false, preViewDir);
 
-        if (!isCollidedU)               pPos.y -= getDistance();
-        else if (viewDir == preViewDir) setPosition(getPrevPosition());
+        if (!isCollidedU)   pPos.y -= getDistance();
+        else                pPos.y += 3;
 
-        preViewDir = UP;
+        setCollided(false, viewDir);
     }
     else if (GetAsyncKeyState('S') & 0x8000)
     {
         viewDir = DOWN;
-        if (preViewDir != viewDir)      setCollided(false, preViewDir);
 
-        if (!isCollidedD)               pPos.y += getDistance();
-        else if (viewDir == preViewDir) setPosition(getPrevPosition());
+        if (!isCollidedD)   pPos.y += getDistance();
+        else                pPos.y -= 3;
 
-        preViewDir = DOWN;
+        setCollided(false, viewDir);
     }
     else // pause
     {
         viewDir = PAUSE;
-        preViewDir = PAUSE;
     }
 
     if (viewDir != PAUSE)

@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Item.h"
 #include "Tilemap.h"
+#include "Tile.h"
 
 class GameCenter
 {
@@ -17,7 +18,8 @@ private:
 private:
 	Player player;
 	std::list<Item*> itemList;
-	Tilemap tilemap;
+	//Tilemap tilemap;
+	Tile tile;
 
 public:
 	// player : 플레이어 객체 불러오기
@@ -29,7 +31,7 @@ public:
 	std::list<Item*>& getItemList() { return itemList; }
 
 	// tilemap : 배경의 tile들
-	Tilemap getTilemap() { return tilemap; }
+	//Tilemap getTilemap() { return tilemap; }
 
 public:
 	// 초기화
@@ -56,14 +58,21 @@ private:
 	HBITMAP hInvenImage;
 	BITMAP bitInven;
 
+	// 시작화면
+	HBITMAP hStartImage;
+	BITMAP bitStart;
+	HBITMAP hBackImage;
+	BITMAP bitBack;
+
 public:
-	void DrawBitmapDoubleBuffering(HWND m_hWnd, HDC hdc);
+	void CreateBitmap(HDC hdc);
+	void DrawBitmapDoubleBuffering(HDC hdc);
 	void DeleteBitmap();
 
-
-	// 씬 읽어오기
-public:
-	void SaveTile();
-	void LoadTile();
+	// 씬전환
+private:
+	bool startScene = true; 
+	void StartScene(HDC hdc);
+	bool isTouched = false;
 };
 

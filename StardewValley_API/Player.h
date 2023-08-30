@@ -17,10 +17,11 @@ private:
     float speed;
 
     int viewDir;
-    int preViewDir;
+    //int preViewDir;
 
     POINT startRect;
     POINT endRect;
+    RECT rectP;
 
     bool isCollidedL;
     bool isCollidedR;
@@ -30,7 +31,6 @@ private:
     POINT cursorPos;
     bool mineTimeChecked;
     bool isMining;
-    //bool miningCycle;
     int miningCycle;
 
 public:
@@ -47,19 +47,19 @@ public:
 
     // viewDir : 플레이어가 보는 방향
     void setViewDir(int vd) { viewDir = vd; }
-    int getpreViewDir() { return preViewDir; }
     int getViewDir() { return viewDir; }
 
-
+    
+    
     //// 충돌 관련
     // RECT : 플레이어 collider 사각형
-    void setRect(POINT start, POINT end) { startRect = start; endRect = end; }
+    void setRect(POINT start, POINT end) { startRect = start; endRect = end; rectP = { start.x, start.y, end.x, end.y }; }
     POINT getStartRect() { return startRect; }
     POINT getEndRect() { return endRect; }
+    LPRECT getRect() { return &rectP; }
 
     // isCollided : 충돌 체크
     void setCollided(bool check, int collidedView);
-    int getCollidedDir() { return preViewDir; }
 
     
     //// 상호작용 관련
@@ -70,7 +70,6 @@ public:
     // minecheck : 광석이 없어질 타이밍을 위한 flag
     void setMineCheck(bool mine) { mineTimeChecked = mine; }
     bool getMineCheck() { return mineTimeChecked; }
-
 
 
 public:
@@ -106,7 +105,6 @@ private:
 
     HBITMAP hToolImage;
     BITMAP bitTool;
-
     
 
 public:

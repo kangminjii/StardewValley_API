@@ -10,6 +10,7 @@ private:
 
 	POINT startRect;
 	POINT endRect;
+	RECT rectI;
 
 	int paintType; // 광물의 종류
 
@@ -19,9 +20,11 @@ public:
 	POINT getPosition() { return position; }
 
 	// RECT : 아이템 collider 사각형
-	void setRect(POINT start, POINT end) { startRect = start; endRect = end; }
+	void setRect(POINT start, POINT end) { startRect = start; endRect = end; rectI = { start.x, start.y, end.x, end.y }; }
 	POINT getStartRect() { return startRect; }
 	POINT getEndRect() { return endRect; }
+	LPRECT getRect() { return &rectI; }
+	
 
 	// 광물의 종류 구분
 	void setPaintType(int pt) { paintType = pt; }

@@ -32,12 +32,6 @@ void Timer::Update()
 
 	deltaTime = abs((float)(curTime - lastTime) * timeScale);
 	lastTime = curTime;
-
-}
-
-float Timer::getDeltaTime()
-{
-	return deltaTime;
 }
 
 void Timer::UpdateFPS()
@@ -63,7 +57,3 @@ void Timer::UpdateFPS()
 	lastTime = curTime;
 }
 
-float Timer::getFPS()
-{
-	return fps;
-}

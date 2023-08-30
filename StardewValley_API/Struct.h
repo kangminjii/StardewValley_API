@@ -16,4 +16,9 @@ public:
 	Vec2(int _x, int _y)
 		: x((float)_x), y((float)_y)
 	{}
+
+	Vec2 operator-(int _x)
+	{
+		return Vec2(x - _x, y - _x);
+	}
 };

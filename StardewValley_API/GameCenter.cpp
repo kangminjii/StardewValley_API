@@ -11,18 +11,7 @@ GameCenter::GameCenter()
 	: m_hWnd(0), m_ptResolution{0,0}, m_hdc(0), rectView()
 {
 	addItem();
-	// inventory
-
-	hInvenImage = (HBITMAP)LoadImage(NULL, TEXT("images/inventory.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-
-	if (hInvenImage == NULL) // 이미지가 출력되지 않을 때
-	{
-		DWORD dwError = GetLastError();
-		MessageBox(NULL, TEXT("인벤토리 이미지 로드 에러"), TEXT("에러"), MB_OK);
-		return;
-	}
-
-	GetObject(hInvenImage, sizeof(BITMAP), &bitInven);
+	CreateBitmap(m_hdc);
 }
 
 GameCenter::~GameCenter()
@@ -32,22 +21,36 @@ GameCenter::~GameCenter()
 
 void GameCenter::Update()
 {
-	DrawBitmapDoubleBuffering(m_hWnd, m_hdc);
-	
-	player.UpdatePlayer();
-	OnCollision();
-	isMining(m_hWnd);
-
-	if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+	if (startScene)
 	{
-		//tilemap.SaveTile();
-		SaveTile();
+		StartScene(m_hdc);
+		POINT curPos;
+		GetCursorPos(&curPos);
+		ScreenToClient(m_hWnd, &curPos);
+		
+		if ((curPos.x >= 400 && curPos.x <= 600) && (curPos.y >= 500 && curPos.y <= 600))
+		{
+			if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) // 클릭하면 다음 씬으로 넘어가기
+			{
+				startScene = false;
+				DeleteObject(hStartImage);
+				DeleteObject(hBackImage);
+			}
+			else // 아닐시 버튼 깜빡거리기
+			{
+				isTouched = true;
+			}
+		}
+		else
+			isTouched = false;
 	}
-
-	if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+	else
 	{
-		//tilemap.LoadTile();
-		LoadTile();
+		DrawBitmapDoubleBuffering(m_hdc);
+
+		player.UpdatePlayer();
+		OnCollision();
+		isMining(m_hWnd);
 	}
 }
 
@@ -103,16 +106,25 @@ void GameCenter::addItem()
 	// 랜덤한 타일맵에 아이템 배치
 	srand(time(NULL));
 
+	vector<vector<POINT>> tiles(ROW, vector<POINT>(COL));
+	for (int i = 0; i < ROW; i++)
+	{
+		for (int j = 0; j < COL; j++)
+		{
+			tiles[i][j] = { 40 * j, 40 * i };
+		}
+	}
+
 	for (int i = 9; i < 16; i++) // 행
 	{
 		for (int j = 8; j < 17; j++) // 열
 		{
-			int random = rand() % 5; // 0, 1, 2, 3, 4
-			int stoneType = rand() % 3; // 0, 1, 2
+			int random = rand() % 5; // 0~4
+			int stoneType = rand() % 3; // 0~2
 
 			if (random == 0)
 			{
-				Item* i1 = new Item({ tilemap.getTiles()[i][j].x, tilemap.getTiles()[i][j].y }, stoneType);
+				Item* i1 = new Item({ tiles[i][j].x, tiles[i][j].y }, stoneType);
 				itemList.push_back(i1);
 			}
 		}
@@ -128,40 +140,87 @@ void GameCenter::OnCollision()
 {
 	for (auto it = itemList.begin(); it != itemList.end(); it++)
 	{
-		// x축
-		if (player.getStartRect().x - 2 < (*it)->getEndRect().x && (*it)->getStartRect().x < player.getEndRect().x + 2)
+		// IntersectRect 함수로 확인하는 방법
+		static RECT tmpRect;
+		LPRECT playerRect = player.getRect();
+		LPRECT itemRect = (*it)->getRect();
+		if (IntersectRect(&tmpRect, playerRect, itemRect))
 		{
-			if (player.getStartRect().y - 2  < (*it)->getEndRect().y && player.getEndRect().y + 2 > (*it)->getStartRect().y )
-			{
-				cout << "collided! " << player.getCollidedDir() << endl;
-				player.setCollided(true, player.getViewDir());
-				player.setPrevPosition(player.getPosition());
-			}
-			else
-			{
-				player.setCollided(false, player.getpreViewDir());
-			}
-		}
-		// y축
-		if (player.getStartRect().y - 2 < (*it)->getEndRect().y && player.getEndRect().y + 2 > (*it)->getStartRect().y)
-		{
-			if (player.getStartRect().x - 2 < (*it)->getEndRect().x && (*it)->getStartRect().x < player.getEndRect().x + 2)
-			{
-				cout << "collided! " << player.getCollidedDir() << endl;
-				player.setCollided(true, player.getViewDir());
-				player.setPrevPosition(player.getPosition());
-			}
-			else
-			{
-				player.setCollided(false, player.getpreViewDir());
-			}
-		}
-	}
+			player.setCollided(true, player.getViewDir());
+			//cout << "collided! " << player.getCollidedDir() << endl;
 
-	
+			player.setPrevPosition(player.getPosition());
+		}
+		
+		// 사각형 x, y좌표로 확인하는 방법
+		//// x축
+		//if (player.getStartRect().x < (*it)->getEndRect().x && (*it)->getStartRect().x < player.getEndRect().x)
+		//{
+		//	if (player.getStartRect().y < (*it)->getEndRect().y && player.getEndRect().y > (*it)->getStartRect().y )
+		//	{
+		//		cout << "collided! " << endl;
+		//		player.setCollided(true, player.getViewDir());
+		//		player.setPrevPosition(player.getPosition());
+		//	}
+		//}
+		//// y축
+		//if (player.getStartRect().y - 2 < (*it)->getEndRect().y && player.getEndRect().y + 2 > (*it)->getStartRect().y)
+		//{
+		//	if (player.getStartRect().x - 2 < (*it)->getEndRect().x && (*it)->getStartRect().x < player.getEndRect().x + 2)
+		//	{
+		//		cout << "collided! " << endl;
+		//		player.setCollided(true, player.getViewDir());
+		//		player.setPrevPosition(player.getPosition());
+		//	}
+		//}
+	}
 }
 
-void GameCenter::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
+void GameCenter::CreateBitmap(HDC hdc)
+{
+	// inventory
+	{
+		hInvenImage = (HBITMAP)LoadImage(NULL, TEXT("images/inventory.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+		if (hInvenImage == NULL) // 이미지가 출력되지 않을 때
+		{
+			DWORD dwError = GetLastError();
+			MessageBox(NULL, TEXT("인벤토리 이미지 로드 에러"), TEXT("에러"), MB_OK);
+			return;
+		}
+
+		GetObject(hInvenImage, sizeof(BITMAP), &bitInven);
+	}
+	
+	// start scene
+	{
+		hStartImage = (HBITMAP)LoadImage(NULL, TEXT("images/startScene.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+		if (hStartImage == NULL) // 이미지가 출력되지 않을 때
+		{
+			DWORD dwError = GetLastError();
+			MessageBox(NULL, TEXT("시작 이미지 로드 에러"), TEXT("에러"), MB_OK);
+			return;
+		}
+		GetObject(hStartImage, sizeof(BITMAP), &bitStart);
+	}
+
+	// start Background scene
+	{
+		hBackImage = (HBITMAP)LoadImage(NULL, TEXT("images/startBack.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+		if (hBackImage == NULL) // 이미지가 출력되지 않을 때
+		{
+			DWORD dwError = GetLastError();
+			MessageBox(NULL, TEXT("시작 배경 이미지 로드 에러"), TEXT("에러"), MB_OK);
+			return;
+		}
+		GetObject(hBackImage, sizeof(BITMAP), &bitBack);
+	}
+
+}
+
+void GameCenter::DrawBitmapDoubleBuffering(HDC hdc)
 {
 	HDC hMemDC;
 	HBITMAP hOldBitmap, hInvenBitmap;
@@ -174,8 +233,9 @@ void GameCenter::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 	hOldBitmap = (HBITMAP)SelectObject(hMemDC, hDoubleBufferImage); //  기본은 검정색
 
 	// map
-	tilemap.DrawBitmapDoubleBuffering(hMemDC);
-
+	//tilemap.DrawBitmapDoubleBuffering(hMemDC);
+	tile.PaintTile(hMemDC);
+	
 	// item
 	for (auto it = itemList.begin(); it != itemList.end(); it++)
 		(*it)->DrawBitmapDoubleBuffering(hMemDC);
@@ -226,60 +286,43 @@ void GameCenter::DrawBitmapDoubleBuffering(HWND hWnd, HDC hdc)
 
 void GameCenter::DeleteBitmap()
 {
-	tilemap.DeleteBitmap();
+	tile.DeleteTile();
 	player.DeleteBitmap();
 	itemList.front()->DeleteBitmap();
 	DeleteObject(hInvenImage);
 }
 
-void GameCenter::SaveTile()
+void GameCenter::StartScene(HDC hdc)
 {
-	// 파일 읽어오기
-	wstring strFilePath = TEXT("tiles/test.tiles");
-	FILE* pFile = nullptr;
-	_wfopen_s(&pFile, strFilePath.c_str(), L"wb");
+	HBITMAP hOldBitmap, hStartBitmap, hBackBitmap;
 
-	if (pFile == nullptr)
+	HDC hMemDC = CreateCompatibleDC(hdc);
+
+	if (hDoubleBufferImage == NULL)
 	{
-		MessageBox(NULL, TEXT("타일맵 저장 에러"), TEXT("에러"), MB_OK);
-		return;
+		hDoubleBufferImage = CreateCompatibleBitmap(hdc, rectView.right, rectView.bottom);
 	}
+	hOldBitmap = (HBITMAP)SelectObject(hMemDC, hDoubleBufferImage); //  기본은 검정색
 
-	// 데이터 저장
-	UINT xCount = 16;
-	UINT yCount = 16;
+	// draw
+	HDC hMemDC2 = CreateCompatibleDC(hMemDC);
 
-	fwrite(&xCount, sizeof(UINT), 1, pFile);
-	fwrite(&yCount, sizeof(UINT), 1, pFile);
-
-	//CreateTiles(xCount, yCount);
-	tilemap.DrawBitmapDoubleBuffering(m_hdc);
-
-	fclose(pFile);
-}
-
-void GameCenter::LoadTile()
-{
-	// 파일 읽어오기
-	wstring strFilePath = TEXT("tiles/test.tiles");
-	FILE* pFile = nullptr;
-	_wfopen_s(&pFile, strFilePath.c_str(), L"rb");
-
-	if (pFile == nullptr)
-	{
-		MessageBox(NULL, TEXT("타일맵 저장 에러"), TEXT("에러"), MB_OK);
-		return;
-	}
-
-	UINT xCount = 0;
-	UINT yCount = 0;
-
-	fread(&xCount, sizeof(UINT), 1, pFile);
-	fread(&yCount, sizeof(UINT), 1, pFile);
-
-	// CreateTiles
-	tilemap.DrawBitmapDoubleBuffering(m_hdc);
+	hBackBitmap = (HBITMAP)SelectObject(hMemDC2, hBackImage);
+	TransparentBlt(hMemDC, 0, 0, 1000, 800, hMemDC2, 0, 0, bitBack.bmWidth, bitBack.bmHeight, RGB(0, 0, 0));
 
 
-	fclose(pFile);
+	hStartBitmap = (HBITMAP)SelectObject(hMemDC2, hStartImage);
+	TransparentBlt(hMemDC, 200, 100, 600, 270, hMemDC2, 0, 0, 400, 185, RGB(0, 0, 0));
+	if(!isTouched)
+		TransparentBlt(hMemDC, 400, 500, 150, 100, hMemDC2, 0, 187, 70, 57, RGB(0, 0, 0));
+	else
+		TransparentBlt(hMemDC, 400, 500, 150, 100, hMemDC2, 0, 244, 70, 57, RGB(0, 0, 0));
+
+	SelectObject(hMemDC2, hStartBitmap);
+	DeleteDC(hMemDC2);
+
+	TransparentBlt(hdc, 0, 0, rectView.right, rectView.bottom, hMemDC, 0, 0, rectView.right, rectView.bottom, RGB(0,0,0));
+
+	SelectObject(hMemDC, hOldBitmap);
+	DeleteDC(hMemDC);
 }

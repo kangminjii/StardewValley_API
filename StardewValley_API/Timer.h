@@ -14,8 +14,8 @@ private:
 	float fps;
 
 public:
-	float getDeltaTime();
-	float getFPS();
+	float getDeltaTime() { return deltaTime; }
+	float getFPS() { return fps; }
 
 public:
 	Timer();

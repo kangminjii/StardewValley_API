@@ -132,9 +132,11 @@
     <ClInclude Include="Define.h" />
     <ClInclude Include="GameCenter.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Scene_Tool.h" />
     <ClInclude Include="Struct.h" />
-    <ClInclude Include="Tilemap.h" />
+    <ClInclude Include="Tile.h" />
+    <ClInclude Include="Tilemap.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Item.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Player.h" />
@@ -152,7 +154,10 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="StardewValley_API.cpp" />
-    <ClCompile Include="Tilemap.cpp" />
+    <ClCompile Include="Tile.cpp" />
+    <ClCompile Include="Tilemap.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Timer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>

@@ -21,8 +21,6 @@ void Tilemap::setTiles()
 			tiles[i][j] = { 40 * j, 40 * i };
 		}
 	}
-
-	
 }
 
 void Tilemap::CreateBitmap()
