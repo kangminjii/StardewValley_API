@@ -1,4 +1,4 @@
-### StardewValley 모작
+# StardewValley 모작
 
 사용언어 : C++
 
